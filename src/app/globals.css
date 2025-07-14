@@ -143,46 +143,58 @@
 
   /* Variant: link */
   .text-body-sm-link {
-    @apply text-body-sm;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 400;
     text-decoration: underline;
     text-underline-offset: 2px;
   }
   .text-body-md-link {
-    @apply text-body-md;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
     text-decoration: underline;
     text-underline-offset: 2px;
   }
   .text-body-lg-link {
-    @apply text-body-lg;
+    font-size: 20px;
+    line-height: 32px;
+    font-weight: 400;
     text-decoration: underline;
     text-underline-offset: 2px;
   }
 
   /* Variant: semibold */
   .text-body-sm-semibold {
-    @apply text-body-sm;
+    font-size: 12px;
+    line-height: 16px;
     font-weight: 600;
   }
   .text-body-md-semibold {
-    @apply text-body-md;
+    font-size: 16px;
+    line-height: 24px;
     font-weight: 600;
   }
   .text-body-lg-semibold {
-    @apply text-body-lg;
+    font-size: 20px;
+    line-height: 32px;
     font-weight: 600;
   }
 
   /* Variant: bold */
   .text-body-sm-bold {
-    @apply text-body-sm;
+    font-size: 12px;
+    line-height: 16px;
     font-weight: 700;
   }
   .text-body-md-bold {
-    @apply text-body-md;
+    font-size: 16px;
+    line-height: 24px;
     font-weight: 700;
   }
   .text-body-lg-bold {
-    @apply text-body-lg;
+    font-size: 20px;
+    line-height: 32px;
     font-weight: 700;
   }
 
