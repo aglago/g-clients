@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export default function VerifyEmail() {
+function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
@@ -17,19 +17,7 @@ export default function VerifyEmail() {
   const [verificationToken, setVerificationToken] = useState(token || '');
   const [message, setMessage] = useState('');
   
-  // If token is provided in URL, verify automatically
-  useEffect(() => {
-    if (token) {
-      handleVerify();
-    }
-  }, [token]);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVerificationToken(e.target.value);
-    if (error) clearError();
-  };
-  
-  const handleVerify = async () => {
+  const handleVerify = useCallback(async () => {
     try {
       await verifyEmail(verificationToken);
       setMessage('Email verified successfully! Redirecting to login...');
@@ -42,6 +30,18 @@ export default function VerifyEmail() {
       // Error is handled by the store
       console.error('Verification error:', error);
     }
+  }, [verifyEmail, verificationToken, router]);
+  
+  // If token is provided in URL, verify automatically
+  useEffect(() => {
+    if (token) {
+      handleVerify();
+    }
+  }, [token, handleVerify]);
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVerificationToken(e.target.value);
+    if (error) clearError();
   };
   
   const handleResend = async () => {
@@ -112,5 +112,13 @@ export default function VerifyEmail() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function VerifyEmail() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyEmailForm />
+    </Suspense>
   );
 }
