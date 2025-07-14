@@ -4,12 +4,13 @@ import { requireAuth, requireAdmin } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth(request);
+    const { id } = await params;
     
-    const course = await courseService.getCourseById(params.id);
+    const course = await courseService.getCourseById(id);
     
     if (!course) {
       return NextResponse.json(
@@ -36,12 +37,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin(request);
+    const { id } = await params;
     
-    const course = await courseService.getCourseById(params.id);
+    const course = await courseService.getCourseById(id);
     if (!course) {
       return NextResponse.json(
         { success: false, message: 'Course not found' },
@@ -52,7 +54,7 @@ export async function PUT(
     const body = await request.json();
     const { title, description, instructor, duration, price } = body;
     
-    const updates: any = {};
+    const updates: Partial<{title: string; description: string; instructor: string; duration: number; price: number}> = {};
     if (title !== undefined) updates.title = title;
     if (description !== undefined) updates.description = description;
     if (instructor !== undefined) updates.instructor = instructor;
@@ -82,7 +84,7 @@ export async function PUT(
       );
     }
 
-    const updatedCourse = await courseService.updateCourse(params.id, updates);
+    const updatedCourse = await courseService.updateCourse(id, updates);
     
     return NextResponse.json(updatedCourse);
   } catch (error) {
@@ -102,12 +104,13 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin(request);
+    const { id } = await params;
     
-    const course = await courseService.getCourseById(params.id);
+    const course = await courseService.getCourseById(id);
     if (!course) {
       return NextResponse.json(
         { success: false, message: 'Course not found' },
@@ -115,7 +118,7 @@ export async function DELETE(
       );
     }
 
-    await courseService.deleteCourse(params.id);
+    await courseService.deleteCourse(id);
     
     return NextResponse.json(
       { success: true, message: 'Course deleted successfully' },

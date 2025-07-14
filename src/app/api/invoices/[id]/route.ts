@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/database';
+import { invoiceService } from '@/lib/services';
 import { requireAuth, requireAdmin } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireAuth(request);
+    await requireAuth(request);
+    const { id } = await params;
     
-    const invoice = db.getInvoiceById(params.id);
+    const invoice = await invoiceService.getInvoiceById(id);
     
     if (!invoice) {
       return NextResponse.json(
@@ -36,12 +37,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
+    const { id } = await params;
     
-    const invoice = db.getInvoiceById(params.id);
+    const invoice = await invoiceService.getInvoiceById(id);
     if (!invoice) {
       return NextResponse.json(
         { success: false, message: 'Invoice not found' },
@@ -52,7 +54,7 @@ export async function PUT(
     const body = await request.json();
     const { status, paymentDate } = body;
     
-    const updates: any = {};
+    const updates: Partial<{status: 'pending' | 'paid' | 'cancelled'; paymentDate: Date}> = {};
     if (status !== undefined) {
       if (!['pending', 'paid', 'cancelled'].includes(status)) {
         return NextResponse.json(
@@ -62,7 +64,7 @@ export async function PUT(
       }
       updates.status = status;
     }
-    if (paymentDate !== undefined) updates.paymentDate = paymentDate;
+    if (paymentDate !== undefined) updates.paymentDate = new Date(paymentDate);
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json(
@@ -71,7 +73,7 @@ export async function PUT(
       );
     }
 
-    const updatedInvoice = db.updateInvoice(params.id, updates);
+    const updatedInvoice = await invoiceService.updateInvoice(id, updates);
     
     return NextResponse.json(updatedInvoice);
   } catch (error) {
@@ -91,12 +93,13 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
+    const { id } = await params;
     
-    const invoice = db.getInvoiceById(params.id);
+    const invoice = await invoiceService.getInvoiceById(id);
     if (!invoice) {
       return NextResponse.json(
         { success: false, message: 'Invoice not found' },
@@ -104,7 +107,7 @@ export async function DELETE(
       );
     }
 
-    db.deleteInvoice(params.id);
+    await invoiceService.deleteInvoice(id);
     
     return NextResponse.json(
       { success: true, message: 'Invoice deleted successfully' },

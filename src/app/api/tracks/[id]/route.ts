@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/database';
+import { trackService } from '@/lib/services';
 import { requireAuth, requireAdmin } from '@/lib/auth';
+import { Types } from 'mongoose';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireAuth(request);
+    await requireAuth(request);
+    const { id } = await params;
     
-    const track = db.getTrackById(params.id);
+    const track = await trackService.getTrackById(id);
     
     if (!track) {
       return NextResponse.json(
@@ -36,12 +38,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
+    const { id } = await params;
     
-    const track = db.getTrackById(params.id);
+    const track = await trackService.getTrackById(id);
     if (!track) {
       return NextResponse.json(
         { success: false, message: 'Track not found' },
@@ -52,7 +55,7 @@ export async function PUT(
     const body = await request.json();
     const { name, description, courses } = body;
     
-    const updates: any = {};
+    const updates: Partial<{name: string; description: string; courses: Types.ObjectId[]}> = {};
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description;
     if (courses !== undefined) {
@@ -62,7 +65,7 @@ export async function PUT(
           { status: 400 }
         );
       }
-      updates.courses = courses;
+      updates.courses = courses.map(courseId => new Types.ObjectId(courseId));
     }
 
     if (Object.keys(updates).length === 0) {
@@ -72,7 +75,7 @@ export async function PUT(
       );
     }
 
-    const updatedTrack = db.updateTrack(params.id, updates);
+    const updatedTrack = await trackService.updateTrack(id, updates);
     
     return NextResponse.json(updatedTrack);
   } catch (error) {
@@ -92,12 +95,13 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
+    const { id } = await params;
     
-    const track = db.getTrackById(params.id);
+    const track = await trackService.getTrackById(id);
     if (!track) {
       return NextResponse.json(
         { success: false, message: 'Track not found' },
@@ -105,7 +109,7 @@ export async function DELETE(
       );
     }
 
-    db.deleteTrack(params.id);
+    await trackService.deleteTrack(id);
     
     return NextResponse.json(
       { success: true, message: 'Track deleted successfully' },

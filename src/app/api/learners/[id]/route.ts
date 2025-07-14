@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/database';
+import { userService } from '@/lib/services';
 import { requireAdmin } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
+    const { id } = await params;
     
-    const learner = db.getUserById(params.id);
+    const learner = await userService.getUserById(id);
     
     if (!learner || learner.role !== 'learner') {
       return NextResponse.json(
@@ -46,12 +47,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
+    const { id } = await params;
     
-    const learner = db.getUserById(params.id);
+    const learner = await userService.getUserById(id);
     if (!learner || learner.role !== 'learner') {
       return NextResponse.json(
         { success: false, message: 'Learner not found' },
@@ -62,7 +64,7 @@ export async function PUT(
     const body = await request.json();
     const { firstName, lastName, contact } = body;
     
-    const updates: any = {};
+    const updates: Partial<{firstName: string; lastName: string; contact: string}> = {};
     if (firstName !== undefined) updates.firstName = firstName;
     if (lastName !== undefined) updates.lastName = lastName;
     if (contact !== undefined) updates.contact = contact;
@@ -74,7 +76,7 @@ export async function PUT(
       );
     }
 
-    const updatedLearner = db.updateUser(params.id, updates);
+    const updatedLearner = await userService.updateUser(id, updates);
     
     if (!updatedLearner) {
       return NextResponse.json(
@@ -111,12 +113,13 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
+    const { id } = await params;
     
-    const learner = db.getUserById(params.id);
+    const learner = await userService.getUserById(id);
     if (!learner || learner.role !== 'learner') {
       return NextResponse.json(
         { success: false, message: 'Learner not found' },
@@ -124,7 +127,7 @@ export async function DELETE(
       );
     }
 
-    db.deleteUser(params.id);
+    await userService.deleteUser(id);
     
     return NextResponse.json(
       { success: true, message: 'Learner deleted successfully' },

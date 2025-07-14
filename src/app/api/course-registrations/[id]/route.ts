@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/database';
+import { enrollmentService } from '@/lib/services';
 import { requireAuth, requireAdmin } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireAuth(request);
+    await requireAuth(request);
+    const { id } = await params;
     
-    const registration = db.getCourseRegistrationById(params.id);
+    const registration = await enrollmentService.getCourseRegistrationById(id);
     
     if (!registration) {
       return NextResponse.json(
@@ -36,12 +37,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
+    const { id } = await params;
     
-    const registration = db.getCourseRegistrationById(params.id);
+    const registration = await enrollmentService.getCourseRegistrationById(id);
     if (!registration) {
       return NextResponse.json(
         { success: false, message: 'Course registration not found' },
@@ -52,7 +54,7 @@ export async function PUT(
     const body = await request.json();
     const { status, progress } = body;
     
-    const updates: any = {};
+    const updates: Partial<{status: 'active' | 'completed' | 'cancelled'; progress: number}> = {};
     if (status !== undefined) {
       if (!['active', 'completed', 'cancelled'].includes(status)) {
         return NextResponse.json(
@@ -79,7 +81,7 @@ export async function PUT(
       );
     }
 
-    const updatedRegistration = db.updateCourseRegistration(params.id, updates);
+    const updatedRegistration = await enrollmentService.updateCourseRegistration(id, updates);
     
     return NextResponse.json(updatedRegistration);
   } catch (error) {
@@ -99,12 +101,13 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
+    const { id } = await params;
     
-    const registration = db.getCourseRegistrationById(params.id);
+    const registration = await enrollmentService.getCourseRegistrationById(id);
     if (!registration) {
       return NextResponse.json(
         { success: false, message: 'Course registration not found' },
@@ -112,7 +115,7 @@ export async function DELETE(
       );
     }
 
-    db.deleteCourseRegistration(params.id);
+    await enrollmentService.deleteCourseRegistration(id);
     
     return NextResponse.json(
       { success: true, message: 'Course registration deleted successfully' },
