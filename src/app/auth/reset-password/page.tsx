@@ -6,25 +6,23 @@ import Link from 'next/link';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tokenFromUrl = searchParams.get('token');
   
-  const { resetPassword, isLoading, error, clearError } = useAuthStore();
+  const { resetPassword, isLoading } = useAuthStore();
   
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
   });
   
-  const [message, setMessage] = useState('');
-  
   // Redirect if no token is provided in URL
   useEffect(() => {
     if (!tokenFromUrl) {
-      setMessage('Invalid or missing reset token. Please request a new password reset link.');
       // Optionally redirect after a delay
       setTimeout(() => {
         router.push('/auth/forgot-password');
@@ -35,27 +33,24 @@ function ResetPasswordForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (error) clearError();
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!tokenFromUrl) {
-      setMessage('Missing reset token. Please request a new password reset link.');
+      toast.error('Missing reset token. Please request a new password reset link.');
       return;
     }
     
     if (formData.password !== formData.confirmPassword) {
-      setMessage('Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
     
     try {
       const { password, confirmPassword } = formData;
       await resetPassword(tokenFromUrl, password, confirmPassword);
-      
-      setMessage('Password has been reset successfully. Redirecting to login...');
       
       // Redirect to login after successful reset
       setTimeout(() => {
@@ -69,20 +64,6 @@ function ResetPasswordForm() {
   
   return (
     <>
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-          {error}
-        </div>
-      )}
-      
-      {message && (
-        <div className={`${
-          message.includes('successfully') ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'
-        } px-4 py-3 rounded border mb-6`}>
-          {message}
-        </div>
-      )}
-      
       {!tokenFromUrl ? (
         <div className="text-center py-4">
           <p className="text-gray-700 mb-4">Please check your email for a password reset link.</p>
