@@ -1,0 +1,127 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/database';
+import { requireAuth, requireAdmin } from '@/lib/auth';
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    requireAuth(request);
+    
+    const track = db.getTrackById(params.id);
+    
+    if (!track) {
+      return NextResponse.json(
+        { success: false, message: 'Track not found' },
+        { status: 404 }
+      );
+    }
+    
+    return NextResponse.json(track);
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    console.error('Get track error:', error);
+    return NextResponse.json(
+      { success: false, message: 'Failed to fetch track' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    requireAdmin(request);
+    
+    const track = db.getTrackById(params.id);
+    if (!track) {
+      return NextResponse.json(
+        { success: false, message: 'Track not found' },
+        { status: 404 }
+      );
+    }
+
+    const body = await request.json();
+    const { name, description, courses } = body;
+    
+    const updates: any = {};
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+    if (courses !== undefined) {
+      if (!Array.isArray(courses)) {
+        return NextResponse.json(
+          { success: false, message: 'Courses must be an array' },
+          { status: 400 }
+        );
+      }
+      updates.courses = courses;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json(
+        { success: false, message: 'No valid fields to update' },
+        { status: 400 }
+      );
+    }
+
+    const updatedTrack = db.updateTrack(params.id, updates);
+    
+    return NextResponse.json(updatedTrack);
+  } catch (error) {
+    if (error instanceof Error && (error.message === 'Unauthorized' || error.message === 'Forbidden: Admin access required')) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: error.message === 'Unauthorized' ? 401 : 403 }
+      );
+    }
+    console.error('Update track error:', error);
+    return NextResponse.json(
+      { success: false, message: 'Failed to update track' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    requireAdmin(request);
+    
+    const track = db.getTrackById(params.id);
+    if (!track) {
+      return NextResponse.json(
+        { success: false, message: 'Track not found' },
+        { status: 404 }
+      );
+    }
+
+    db.deleteTrack(params.id);
+    
+    return NextResponse.json(
+      { success: true, message: 'Track deleted successfully' },
+      { status: 200 }
+    );
+  } catch (error) {
+    if (error instanceof Error && (error.message === 'Unauthorized' || error.message === 'Forbidden: Admin access required')) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: error.message === 'Unauthorized' ? 401 : 403 }
+      );
+    }
+    console.error('Delete track error:', error);
+    return NextResponse.json(
+      { success: false, message: 'Failed to delete track' },
+      { status: 500 }
+    );
+  }
+}
