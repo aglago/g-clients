@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/database';
+import { enrollmentService } from '@/lib/services';
 import { requireAuth, requireAdmin } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    requireAuth(request);
+    await requireAuth(request);
     
-    const enrollments = db.getAllTrackEnrollments();
+    const enrollments = await enrollmentService.getAllTrackEnrollments();
     
     return NextResponse.json(enrollments);
   } catch (error) {
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
     
     const body = await request.json();
     const { trackId, learnerId } = body;
@@ -38,10 +38,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const enrollment = db.createTrackEnrollment({
+    const enrollment = await enrollmentService.createTrackEnrollment({
       trackId,
       learnerId,
-      enrollmentDate: new Date().toISOString(),
       status: 'active',
       progress: 0
     });
