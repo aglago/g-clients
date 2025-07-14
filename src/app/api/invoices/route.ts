@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/database';
+import { invoiceService } from '@/lib/services';
 import { requireAuth, requireAdmin } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    requireAuth(request);
+    await requireAuth(request);
     
-    const invoices = db.getAllInvoices();
+    const invoices = await invoiceService.getAllInvoices();
     
     return NextResponse.json(invoices);
   } catch (error) {
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
     
     const body = await request.json();
     const { learnerId, courseId, trackId, amount } = body;
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const invoice = db.createInvoice({
+    const invoice = await invoiceService.createInvoice({
       learnerId,
       courseId,
       trackId,

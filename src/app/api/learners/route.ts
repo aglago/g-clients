@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { userService } from '@/lib/services';
-import { requireAdmin } from '@/lib/auth';
+import { requireAdmin, hashPassword } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
     
     const body = await request.json();
     const { firstName, lastName, email, password, confirmPassword, contact } = body;
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existingUser = db.getUserByEmail(email);
+    const existingUser = await userService.getUserByEmail(email);
     if (existingUser) {
       return NextResponse.json(
         { success: false, message: 'User with this email already exists' },
@@ -70,9 +70,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hashedPassword = hashPassword(password);
+    const hashedPassword = await hashPassword(password);
 
-    const learner = db.createUser({
+    const learner = await userService.createUser({
       firstName,
       lastName,
       email,

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/database';
+import { trackService } from '@/lib/services';
 import { requireAuth, requireAdmin } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    requireAuth(request);
+    await requireAuth(request);
     
-    const tracks = db.getAllTracks();
+    const tracks = await trackService.getAllTracks();
     
     return NextResponse.json(tracks);
   } catch (error) {
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    requireAdmin(request);
+    await requireAdmin(request);
     
     const body = await request.json();
     const { name, description, courses } = body;
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const track = db.createTrack({
+    const track = await trackService.createTrack({
       name,
       description,
       courses
