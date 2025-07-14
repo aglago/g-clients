@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 
 export default function RegisterAdmin() {
   const router = useRouter();
-  const { registerAdmin, isLoading, error, clearError } = useAuthStore();
+  const { registerAdmin, isLoading } = useAuthStore();
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -23,7 +23,6 @@ export default function RegisterAdmin() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (error) clearError();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,12 +50,6 @@ export default function RegisterAdmin() {
 
   return (
     <>
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="rounded-md space-y-3">
           <div>

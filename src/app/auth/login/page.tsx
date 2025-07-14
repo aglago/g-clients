@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 
 export default function Login() {
   const router = useRouter();
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, isLoading } = useAuthStore();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -19,7 +19,6 @@ export default function Login() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (error) clearError();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,12 +38,6 @@ export default function Login() {
 
   return (
     <>
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-          {error}
-        </div>
-      )}
-
       <form className="space-y-2" onSubmit={handleSubmit}>
         <div className="space-y-5">
           <div>
