@@ -8,7 +8,8 @@ export interface IUser extends Document {
   role: 'admin' | 'learner';
   contact?: string;
   isVerified: boolean;
-  verificationToken?: string;
+  verificationOTP?: string;
+  verificationOTPExpiry?: Date;
   resetToken?: string;
   resetTokenExpiry?: Date;
   createdAt: Date;
@@ -23,7 +24,8 @@ const UserSchema = new Schema<IUser>({
   role: { type: String, enum: ['admin', 'learner'], required: true },
   contact: { type: String },
   isVerified: { type: Boolean, default: false },
-  verificationToken: { type: String },
+  verificationOTP: { type: String },
+  verificationOTPExpiry: { type: Date },
   resetToken: { type: String },
   resetTokenExpiry: { type: Date },
 }, {

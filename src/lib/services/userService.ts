@@ -1,6 +1,6 @@
 import connectMongoDB from '../mongodb';
 import { User, type IUser } from '../models';
-import { hashPassword } from '../auth';
+import { hashPassword, generateOTP } from '../auth';
 
 export class UserService {
   async getUserById(id: string): Promise<IUser | null> {
@@ -13,9 +13,12 @@ export class UserService {
     return await User.findOne({ email: email.toLowerCase() });
   }
 
-  async getUserByVerificationToken(token: string): Promise<IUser | null> {
+  async getUserByVerificationOTP(otp: string): Promise<IUser | null> {
     await connectMongoDB();
-    return await User.findOne({ verificationToken: token });
+    return await User.findOne({ 
+      verificationOTP: otp,
+      verificationOTPExpiry: { $gt: new Date() }
+    });
   }
 
   async getUserByResetToken(token: string): Promise<IUser | null> {
@@ -34,7 +37,8 @@ export class UserService {
     role: 'admin' | 'learner';
     contact?: string;
     isVerified?: boolean;
-    verificationToken?: string;
+    verificationOTP?: string;
+    verificationOTPExpiry?: Date;
   }): Promise<IUser> {
     await connectMongoDB();
     
@@ -47,6 +51,35 @@ export class UserService {
     });
 
     return await user.save();
+  }
+
+  async generateAndSetOTP(userId: string): Promise<string> {
+    const otp = generateOTP();
+    const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
+    
+    await this.updateUser(userId, {
+      verificationOTP: otp,
+      verificationOTPExpiry: expiry
+    });
+    
+    return otp;
+  }
+
+  async verifyOTP(otp: string): Promise<IUser | null> {
+    const user = await this.getUserByVerificationOTP(otp);
+    
+    if (!user) {
+      return null;
+    }
+    
+    // Clear OTP and mark as verified
+    await this.updateUser(user.id, {
+      verificationOTP: undefined,
+      verificationOTPExpiry: undefined,
+      isVerified: true
+    });
+    
+    return user;
   }
 
   async updateUser(id: string, updates: Partial<IUser>): Promise<IUser | null> {

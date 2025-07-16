@@ -17,6 +17,10 @@ export function generateToken(): string {
   return randomUUID();
 }
 
+export function generateOTP(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 export function generateJWT(userId: string): string {
   const payload = {
     userId,
