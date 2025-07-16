@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
@@ -11,15 +11,14 @@ function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
-  const token = searchParams.get('token');
   
   const { verifyEmail, resendVerification, isLoading } = useAuthStore();
   
-  const [verificationToken, setVerificationToken] = useState(token || '');
+  const [verificationOTP, setVerificationOTP] = useState('');
   
   const handleVerify = useCallback(async () => {
     try {
-      await verifyEmail(verificationToken);
+      await verifyEmail(verificationOTP);
       
       // Redirect to login after successful verification
       setTimeout(() => {
@@ -29,17 +28,12 @@ function VerifyEmailForm() {
       // Error is handled by the store
       console.error('Verification error:', error);
     }
-  }, [verifyEmail, verificationToken, router]);
-  
-  // If token is provided in URL, verify automatically
-  useEffect(() => {
-    if (token) {
-      handleVerify();
-    }
-  }, [token, handleVerify]);
+  }, [verifyEmail, verificationOTP, router]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVerificationToken(e.target.value);
+    // Only allow numbers and limit to 6 digits
+    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setVerificationOTP(value);
   };
   
   const handleResend = async () => {
@@ -61,17 +55,19 @@ function VerifyEmailForm() {
       <div className="space-y-6">
         <div className="rounded-md shadow-sm space-y-4">
           <div>
-            <label htmlFor="token" className="text-body-md">
-              Code
+            <label htmlFor="otp" className="text-body-md">
+              OTP Code
             </label>
             <Input
-              id="token"
-              name="token"
+              id="otp"
+              name="otp"
               type="text"
               required
-              value={verificationToken}
+              value={verificationOTP}
               onChange={handleChange}
               placeholder="123456"
+              maxLength={6}
+              style={{ letterSpacing: '0.5em', textAlign: 'center' }}
             />
           </div>
         </div>
@@ -80,19 +76,19 @@ function VerifyEmailForm() {
           <Button
             type="button"
             onClick={handleVerify}
-            disabled={isLoading || !verificationToken}
+            disabled={isLoading || !verificationOTP || verificationOTP.length !== 6}
           >
             {isLoading ? 'Verifying...' : 'Verify Email'}
           </Button>
           
         </div>
         <div className="text-sm text-center pt-2">
-          Didn&apos;t you receive the OPT?{" "}
+          Didn&apos;t you receive the OTP?{" "}
             <span
               onClick={handleResend}
               className="text-body-md-link text-primary/70 cursor-pointer"
             >
-              Resesnd OTP
+              Resend OTP
             </span>
         </div>
       </div>
