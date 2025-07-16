@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { userService } from '@/lib/services';
-import { generateToken } from '@/lib/auth';
 import { emailService } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
@@ -37,8 +36,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const verificationToken = generateToken();
-
     const user = await userService.createUser({
       firstName,
       lastName,
@@ -46,13 +43,13 @@ export async function POST(request: NextRequest) {
       password,
       role: 'learner',
       contact,
-      isVerified: false,
-      verificationToken
+      isVerified: false
     });
 
-    // Send verification email
+    // Generate and send OTP
     try {
-      await emailService.sendVerificationEmail(email, verificationToken, firstName);
+      const otp = await userService.generateAndSetOTP(user.id);
+      await emailService.sendVerificationEmail(email, otp, firstName);
     } catch (emailError) {
       console.error('Failed to send verification email:', emailError);
       // Don't fail registration if email fails

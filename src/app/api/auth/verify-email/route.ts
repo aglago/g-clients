@@ -5,34 +5,22 @@ import { emailService } from '@/lib/email';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { token } = body;
+    const { otp } = body;
     
-    if (!token) {
+    if (!otp) {
       return NextResponse.json(
-        { success: false, message: 'Verification token is required' },
+        { success: false, message: 'Verification OTP is required' },
         { status: 400 }
       );
     }
 
-    const user = await userService.getUserByVerificationToken(token);
+    const user = await userService.verifyOTP(otp);
     if (!user) {
       return NextResponse.json(
-        { success: false, message: 'Invalid or expired verification token' },
+        { success: false, message: 'Invalid or expired verification OTP' },
         { status: 400 }
       );
     }
-
-    if (user.isVerified) {
-      return NextResponse.json(
-        { success: false, message: 'Email is already verified' },
-        { status: 400 }
-      );
-    }
-
-    await userService.updateUser(user.id, {
-      isVerified: true,
-      verificationToken: undefined
-    });
 
     // Send welcome email
     try {
