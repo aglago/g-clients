@@ -16,9 +16,18 @@ const apiClient = axios.create({
 // Add request interceptor to include auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Get token from Zustand store instead of localStorage directly
+    const authStorage = localStorage.getItem('auth-storage');
+    if (authStorage) {
+      try {
+        const parsedAuth = JSON.parse(authStorage);
+        const token = parsedAuth.state?.token;
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.error('Error parsing auth storage:', error);
+      }
     }
     return config;
   },
@@ -53,7 +62,7 @@ export interface LoginRequest {
 }
 
 export interface VerifyEmailRequest {
-  token: string;
+  otp: string;
 }
 
 export interface ResendVerificationRequest {
@@ -111,9 +120,7 @@ const authApi = {
   // POST /auth/login - Login
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     const response = await apiClient.post('/auth/login', data);
-    if (response.data.token) {
-      localStorage.setItem('authToken', response.data.token);
-    }
+    // Token will be stored by the auth store, not here
     return response.data;
   },
 
@@ -121,7 +128,7 @@ const authApi = {
   verifyEmail: async (data: VerifyEmailRequest): Promise<AuthResponse> => {
     const response = await apiClient.post('/auth/verify-email', data);
     console.log('Email verification response:', response.data);
-    console.log('Email verification token:', data.token);
+    console.log('Email verification OTP:', data.otp);
     return response.data;
   },
 
@@ -153,7 +160,7 @@ const authApi = {
   // POST /auth/logout - Logout
   logout: async (): Promise<AuthResponse> => {
     const response = await apiClient.post('/auth/logout');
-    localStorage.removeItem('authToken');
+    // Token will be removed by the auth store, not here
     return response.data;
   },
 

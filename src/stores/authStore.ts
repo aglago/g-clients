@@ -14,7 +14,7 @@ interface AdminAuthState {
   // Auth actions
   registerAdmin: (firstName: string, lastName: string, email: string, password: string, confirmPassword: string, contact: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  verifyEmail: (token: string) => Promise<void>;
+  verifyEmail: (otp: string) => Promise<void>;
   resendVerification: (email: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string, confirmPassword: string) => Promise<void>;
@@ -57,6 +57,16 @@ export const useAuthStore = create<AdminAuthState>()(
             isLoading: false
           });
           
+          // Set cookie for middleware compatibility
+          if (response.token) {
+            document.cookie = `auth-storage=${JSON.stringify({
+              state: {
+                token: response.token,
+                isAuthenticated: true
+              }
+            })}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
+          }
+          
           toast.success('Registration successful! Please check your email to verify your account.');
         } catch (error) {
           set({ isLoading: false });
@@ -77,6 +87,16 @@ export const useAuthStore = create<AdminAuthState>()(
             isLoading: false
           });
           
+          // Set cookie for middleware compatibility
+          if (response.token) {
+            document.cookie = `auth-storage=${JSON.stringify({
+              state: {
+                token: response.token,
+                isAuthenticated: true
+              }
+            })}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
+          }
+          
           toast.success('Login successful! Welcome back.');
         } catch (error) {
           set({ isLoading: false });
@@ -85,10 +105,10 @@ export const useAuthStore = create<AdminAuthState>()(
         }
       },
 
-      verifyEmail: async (token) => {
+      verifyEmail: async (otp) => {
         try {
           set({ isLoading: true });
-          await authApi.verifyEmail({ token });
+          await authApi.verifyEmail({ otp });
           set({ isLoading: false });
           toast.success('Email verified successfully!');
         } catch (error) {
@@ -160,6 +180,10 @@ export const useAuthStore = create<AdminAuthState>()(
             isAuthenticated: false, 
             isLoading: false 
           });
+          
+          // Remove cookie for middleware compatibility
+          document.cookie = 'auth-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          
           toast.success('Logged out successfully.');
         } catch (error) {
           set({ isLoading: false });
@@ -174,6 +198,18 @@ export const useAuthStore = create<AdminAuthState>()(
         token: state.token,
         isAuthenticated: state.isAuthenticated
       }),
+      // Sync with cookies for middleware compatibility
+      onRehydrateStorage: () => (state) => {
+        if (state?.token && state?.isAuthenticated) {
+          // Set cookie for middleware
+          document.cookie = `auth-storage=${JSON.stringify({
+            state: {
+              token: state.token,
+              isAuthenticated: state.isAuthenticated
+            }
+          })}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
+        }
+      }
     }
   )
 );
