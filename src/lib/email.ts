@@ -38,23 +38,19 @@ class EmailService {
     }
   }
 
-  async sendVerificationEmail(email: string, token: string, firstName: string): Promise<void> {
-    const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/verify-email?token=${token}`;
-    
+  async sendVerificationEmail(email: string, otp: string, firstName: string): Promise<void> {
     const html = `
       <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
         <h2 style="color: #333; text-align: center;">Welcome to ProjectOne!</h2>
         <p>Hi ${firstName},</p>
-        <p>Thank you for registering with ProjectOne. Please click the button below to verify your email address:</p>
+        <p>Thank you for registering with ProjectOne. Please use the verification code below to verify your email address:</p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${verificationUrl}" 
-             style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
-            Verify Email Address
-          </a>
+          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 2px dashed #007bff;">
+            <h1 style="color: #007bff; margin: 0; font-size: 36px; letter-spacing: 8px;">${otp}</h1>
+          </div>
         </div>
-        <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
-        <p style="word-break: break-all; color: #007bff;">${verificationUrl}</p>
-        <p>This verification link will expire in 24 hours.</p>
+        <p>Enter this 6-digit code on the verification page to complete your registration.</p>
+        <p>This verification code will expire in 15 minutes.</p>
         <p>If you didn't create an account, please ignore this email.</p>
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
         <p style="color: #666; font-size: 12px; text-align: center;">
@@ -68,11 +64,13 @@ class EmailService {
       
       Hi ${firstName},
       
-      Thank you for registering with ProjectOne. Please visit the following link to verify your email address:
+      Thank you for registering with ProjectOne. Please use the following verification code to verify your email address:
       
-      ${verificationUrl}
+      ${otp}
       
-      This verification link will expire in 24 hours.
+      Enter this 6-digit code on the verification page to complete your registration.
+      
+      This verification code will expire in 15 minutes.
       
       If you didn't create an account, please ignore this email.
     `;
