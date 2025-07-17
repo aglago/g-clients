@@ -9,18 +9,19 @@ A comprehensive guide to the complete admin authentication system implementation
 3. [Admin Registration](#admin-registration)
 4. [Email Verification (OTP)](#email-verification-otp)
 5. [Admin Login](#admin-login)
-6. [Password Reset Flow](#password-reset-flow)
-7. [Authentication Middleware](#authentication-middleware)
-8. [JWT Token Management](#jwt-token-management)
-9. [State Management](#state-management)
-10. [Frontend Implementation](#frontend-implementation)
-11. [Backend Implementation](#backend-implementation)
-12. [Database Design](#database-design)
-13. [Email Service](#email-service)
-14. [Security Measures](#security-measures)
-15. [Error Handling](#error-handling)
-16. [Testing All Flows](#testing-all-flows)
-17. [Code Deep Dive](#code-deep-dive)
+6. [Unverified User Login Flow](#unverified-user-login-flow)
+7. [Password Reset Flow](#password-reset-flow)
+8. [Authentication Middleware](#authentication-middleware)
+9. [JWT Token Management](#jwt-token-management)
+10. [State Management](#state-management)
+11. [Frontend Implementation](#frontend-implementation)
+12. [Backend Implementation](#backend-implementation)
+13. [Database Design](#database-design)
+14. [Email Service](#email-service)
+15. [Security Measures](#security-measures)
+16. [Error Handling](#error-handling)
+17. [Testing All Flows](#testing-all-flows)
+18. [Code Deep Dive](#code-deep-dive)
 
 ## 🎯 Overview
 
@@ -31,6 +32,7 @@ The admin authentication system is a comprehensive security solution for Project
 - **📧 Email Verification**: OTP-based email verification system (6-digit codes)
 - **🔑 JWT Authentication**: Stateless token-based authentication
 - **🔄 Login System**: Secure login with email/password
+- **🚀 Smart Login Flow**: Auto-verification for unverified users during login
 - **🔒 Password Reset**: Token-based password reset flow
 - **⚡ Real-time Validation**: Frontend and backend validation
 - **🎯 Error Handling**: Comprehensive error handling with toast notifications
@@ -41,9 +43,10 @@ The admin authentication system is a comprehensive security solution for Project
 ### Complete Authentication Flow
 1. **Registration**: User creates account → OTP sent → Email verified → Account activated
 2. **Login**: User enters credentials → JWT token generated → User authenticated
-3. **Password Reset**: User requests reset → Reset token sent → New password set
-4. **Session Management**: JWT stored → Auto-logout on expiry → Persistent sessions
-5. **Route Protection**: Middleware checks → Redirects if unauthenticated → Admin access control
+3. **Smart Verification**: Unverified users → Auto OTP sent → Verification → Auto-login → Dashboard
+4. **Password Reset**: User requests reset → Reset token sent → New password set
+5. **Session Management**: JWT stored → Auto-logout on expiry → Persistent sessions
+6. **Route Protection**: Middleware checks → Redirects if unauthenticated → Admin access control
 
 ## 🏗️ System Architecture
 
@@ -589,6 +592,129 @@ export async function POST(request: NextRequest) {
 - **JWT generation**: Creates secure token for session management
 - **Error handling**: Secure error messages without information leakage
 - **Redirect logic**: Automatic redirect to dashboard on success
+
+## 🚀 Unverified User Login Flow
+
+### Smart Verification Overview
+The unverified user login flow provides a seamless experience for users who have registered but not yet verified their email. Instead of blocking them with an error, the system automatically sends an OTP and guides them through verification.
+
+### Enhanced Login Flow
+When a user with valid credentials but unverified email attempts to log in:
+
+1. **Credential Validation**: System validates email/password combination
+2. **Verification Check**: Detects user is unverified
+3. **Auto-OTP Generation**: Automatically generates and sends new OTP
+4. **Smart Redirect**: Redirects to verification page with email pre-filled
+5. **Seamless Verification**: User enters OTP to verify email
+6. **Auto-Login**: System automatically logs user in after verification
+7. **Dashboard Access**: User lands directly on dashboard
+
+### Backend Implementation (`src/app/api/auth/login/route.ts`)
+
+The login API now handles unverified users gracefully:
+
+```typescript
+if (!user.isVerified) {
+  // Auto-generate and send OTP for unverified users
+  try {
+    const otp = await userService.generateAndSetOTP(user.id);
+    await emailService.sendVerificationEmail(user.email, otp, user.firstName);
+    
+    return NextResponse.json({
+      success: false,
+      message: 'Email not verified. We\'ve sent a verification code to your email.',
+      requiresVerification: true,
+      email: user.email
+    }, { status: 401 });
+  } catch (otpError) {
+    console.error('Error sending verification OTP:', otpError);
+    return NextResponse.json(
+      { success: false, message: 'Please verify your email before logging in' },
+      { status: 401 }
+    );
+  }
+}
+```
+
+### Enhanced Verification API (`src/app/api/auth/verify-email/route.ts`)
+
+The verification endpoint now returns authentication tokens:
+
+```typescript
+// Generate JWT token for auto-login
+const token = generateJWT(user.id);
+
+return NextResponse.json({
+  success: true,
+  message: 'Email verified successfully',
+  token,
+  user: {
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    role: user.role,
+    contact: user.contact
+  }
+});
+```
+
+### Frontend Integration (`src/stores/authStore.ts`)
+
+The auth store handles the verification flow seamlessly:
+
+```typescript
+// Check if error is due to unverified email with auto-sent OTP
+if (error instanceof AxiosError && error.response?.data?.requiresVerification) {
+  const errorData = error.response.data;
+  toast.success(errorData.message);
+  
+  // Redirect to verification page with email
+  window.location.href = `/auth/verify-email?email=${encodeURIComponent(errorData.email)}`;
+  return;
+}
+```
+
+And auto-login after verification:
+
+```typescript
+// Auto-login user after verification
+set({
+  user: response.user || null,
+  token: response.token || null,
+  isAuthenticated: !!response.token,
+  isLoading: false
+});
+
+// Set cookie for middleware compatibility
+if (response.token) {
+  document.cookie = `auth-storage=${JSON.stringify({
+    state: {
+      token: response.token,
+      isAuthenticated: true
+    }
+  })}; path=/; max-age=${60 * 60 * 24 * 7}`;
+}
+```
+
+### User Experience Benefits
+
+**Before Enhancement:**
+- User tries to log in → Gets "verify email" error → Dead end
+- User has to remember to check registration email
+- Multiple steps to get authenticated
+
+**After Enhancement:**
+- User tries to log in → System sends fresh OTP → Guided to verification
+- One smooth flow from login attempt to dashboard access
+- No frustrating dead ends or user confusion
+
+### Technical Benefits
+
+- **Reduced Support Requests**: No more "I can't log in" tickets from unverified users
+- **Improved Conversion**: Users complete the verification process immediately
+- **Better UX**: Seamless flow without multiple page refreshes
+- **Security Maintained**: Fresh OTP generation ensures security
+- **Auto-Login**: No need to remember credentials after verification
 
 ## 🔒 Password Reset Flow
 
