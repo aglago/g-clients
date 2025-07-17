@@ -95,6 +95,8 @@ export interface AuthResponse {
   success: boolean;
   message: string;
   token?: string;
+  requiresVerification?: boolean;
+  email?: string;
   user?: {
     firstName: string;
     lastName: string;
