@@ -100,6 +100,17 @@ export const useAuthStore = create<AdminAuthState>()(
           toast.success('Login successful! Welcome back.');
         } catch (error) {
           set({ isLoading: false });
+          
+          // Check if error is due to unverified email with auto-sent OTP
+          if (error instanceof AxiosError && error.response?.data?.requiresVerification) {
+            const errorData = error.response.data;
+            toast.success(errorData.message);
+            
+            // Redirect to verification page with email
+            window.location.href = `/auth/verify-email?email=${encodeURIComponent(errorData.email)}`;
+            return;
+          }
+          
           toast.error(handleApiError(error));
           throw error;
         }
@@ -108,9 +119,27 @@ export const useAuthStore = create<AdminAuthState>()(
       verifyEmail: async (otp) => {
         try {
           set({ isLoading: true });
-          await authApi.verifyEmail({ otp });
-          set({ isLoading: false });
-          toast.success('Email verified successfully!');
+          const response = await authApi.verifyEmail({ otp });
+          
+          // Auto-login user after verification
+          set({
+            user: response.user || null,
+            token: response.token || null,
+            isAuthenticated: !!response.token,
+            isLoading: false
+          });
+          
+          // Set cookie for middleware compatibility
+          if (response.token) {
+            document.cookie = `auth-storage=${JSON.stringify({
+              state: {
+                token: response.token,
+                isAuthenticated: true
+              }
+            })}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
+          }
+          
+          toast.success('Email verified successfully! Welcome!');
         } catch (error) {
           set({ isLoading: false });
           toast.error(handleApiError(error));
