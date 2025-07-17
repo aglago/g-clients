@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { userService } from '@/lib/services';
 import { emailService } from '@/lib/email';
+import { generateJWT } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,10 +30,21 @@ export async function POST(request: NextRequest) {
       console.error('Failed to send welcome email:', emailError);
       // Don't fail verification if email fails
     }
+
+    // Generate JWT token for auto-login
+    const token = generateJWT(user.id);
     
     return NextResponse.json({
       success: true,
-      message: 'Email verified successfully'
+      message: 'Email verified successfully',
+      token,
+      user: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        contact: user.contact
+      }
     });
   } catch (error) {
     console.error('Email verification error:', error);
