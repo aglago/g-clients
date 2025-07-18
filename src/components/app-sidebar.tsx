@@ -6,7 +6,9 @@ import {
   BookOpen, 
   Route, 
   FileText,
-  ClipboardList
+  ClipboardList,
+  LogOut,
+  User
 } from "lucide-react";
 
 import {
@@ -21,6 +23,8 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useAuthStore } from "@/stores/authStore";
+import { Button } from "@/components/ui/button";
 
 // Admin Dashboard Menu items
 const items = [
@@ -59,6 +63,16 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { user, logout } = useAuthStore();
+  
+  const handleLogout = async () => {
+    try {
+      await logout();
+      window.location.href = '/auth/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
   
   return (
     <Sidebar collapsible="icon">
@@ -101,14 +115,36 @@ export function AppSidebar() {
           </SidebarMenu>
         </div>
         <SidebarFooter>
-            <div className="flex items-center justify-between">
-                {/* profile image */}
-                <div className="flex flex-col">
-                    {/* Admin name */}
-                    {/* Admin email */}
-                </div>
-                {/* logout icon */}
+          <div className="flex items-center justify-between p-4 bg-white/10 rounded-lg mx-3 mb-3">
+            {/* Profile section */}
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              {/* Profile image */}
+              <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
+              </div>
+              
+              {/* Admin info - only show when expanded */}
+              <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
+                <span className="text-white font-medium text-sm truncate">
+                  {user ? `${user.firstName} ${user.lastName}` : 'Admin User'}
+                </span>
+                <span className="text-white/70 text-xs truncate">
+                  {user?.email || 'admin@example.com'}
+                </span>
+              </div>
             </div>
+            
+            {/* Logout button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="flex-shrink-0 w-8 h-8 text-white hover:bg-white/20 hover:text-white"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
         </SidebarFooter>
       </SidebarContent>
     </Sidebar>
