@@ -1,11 +1,9 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter, Figtree } from 'next/font/google';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/sonner';
+import { fig, inter } from '@/components/ui/fonts';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const fig = Figtree({ subsets: ['latin'], variable: '--font-fig' });
 
 export const metadata: Metadata = {
   title: 'G-Clients Admin',
