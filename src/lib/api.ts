@@ -186,10 +186,9 @@ const authApi = {
 export interface Course {
   id: string;
   title: string;
+  track: string;
+  picture: string;
   description: string;
-  instructor: string;
-  duration: number;
-  price: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -308,23 +307,32 @@ const learnersApi = {
 export interface Track {
   id: string;
   name: string;
+  price: number;
+  duration: number;
+  instructor: string;
+  picture: string;
   description: string;
-  courses: string[]; // Array of course IDs
+  courses?: string[];
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateTrackRequest {
-  name: string;
+  title: string;
   description: string;
-  courses: string[]; // Array of course IDs
+  instructor: string;
+  duration: number;
+  price: number;
 }
 
 export interface UpdateTrackRequest {
-  name?: string;
+  title?: string;
   description?: string;
-  courses?: string[]; // Array of course IDs
+  instructor?: string;
+  duration?: number;
+  price?: number;
 }
+
 
 const tracksApi = {
   // GET /tracks - Get all tracks
