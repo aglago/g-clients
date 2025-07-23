@@ -312,25 +312,38 @@ export interface Track {
   instructor: string;
   picture: string;
   description: string;
-  courses?: string[];
+  courses?: string[]; // Array of course IDs
+  rating?: number;
+  reviewsCount?: number;
   createdAt: string;
   updatedAt: string;
 }
 
+// Track with populated course data for display
+export interface TrackWithCourses extends Omit<Track, 'courses'> {
+  courses?: Course[]; // Full course objects
+}
+
 export interface CreateTrackRequest {
-  title: string;
-  description: string;
-  instructor: string;
-  duration: number;
+  name: string;
   price: number;
+  duration: number;
+  instructor: string;
+  picture: string;
+  description: string;
+  courses?: string[];
 }
 
 export interface UpdateTrackRequest {
-  title?: string;
+  name?: string;
   description?: string;
   instructor?: string;
   duration?: number;
   price?: number;
+  picture?: string;
+  courses?: string[];
+  rating?: number;
+  reviewsCount?: number;
 }
 
 
