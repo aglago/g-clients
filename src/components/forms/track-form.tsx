@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -35,6 +35,11 @@ export default function TrackForm({ track, onSubmit, isLoading = false }: TrackF
   // const [previewUrl, setPreviewUrl] = useState<string>(track?.picture || '');
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  // Reset selectedFile when track changes (switching between create/edit)
+  useEffect(() => {
+    setSelectedFile(null);
+  }, [track?.id]);
+
   const {
     register,
     handleSubmit,
@@ -58,6 +63,7 @@ export default function TrackForm({ track, onSubmit, isLoading = false }: TrackF
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    console.log('File input changed:', file ? file.name : 'No file');
     if (file) {
       setSelectedFile(file);
       // Create preview URL
@@ -70,8 +76,9 @@ export default function TrackForm({ track, onSubmit, isLoading = false }: TrackF
     let pictureUrl = track?.picture || '';
     
     try {
-      // Upload image to Cloudinary if a new file is selected
+      // Only upload image to Cloudinary if a new file is selected
       if (selectedFile) {
+        console.log('New file selected, uploading to Cloudinary:', selectedFile.name);
         setUploadingImage(true);
         toast.info('Uploading image...');
         
@@ -79,6 +86,8 @@ export default function TrackForm({ track, onSubmit, isLoading = false }: TrackF
         pictureUrl = uploadResult.secure_url;
         
         toast.success('Image uploaded successfully!');
+      } else {
+        console.log('No new file selected, using existing picture URL:', pictureUrl);
       }
 
       const formData = {
