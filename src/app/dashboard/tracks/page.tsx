@@ -1,13 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import PagesHeaders from '@/components/dashboard/pages-headers'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { tracksApi, Track, queryKeys } from '@/lib/api'
+import { X } from 'lucide-react'
+import TrackForm from '@/components/forms/track-form'
+import TrackDetailsModal from '@/components/modals/track-details-modal'
+import { tracksApi, Track, queryKeys, CreateTrackRequest, UpdateTrackRequest } from '@/lib/api'
 
 export default function TracksPage() {
+  const queryClient = useQueryClient()
+  const [showForm, setShowForm] = useState(false)
+  const [editingTrack, setEditingTrack] = useState<Track | null>(null)
+  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null)
+  const [showDetails, setShowDetails] = useState(false)
+  
   // Fetch tracks using TanStack Query
   const { data: tracks = [], isLoading, error } = useQuery({
     queryKey: [queryKeys.tracks.all],
@@ -15,6 +25,44 @@ export default function TracksPage() {
   })
 
   const [filteredTracks, setFilteredTracks] = useState<Track[]>([])
+
+  // Mutations for CRUD operations
+  const createTrackMutation = useMutation({
+    mutationFn: tracksApi.createTrack,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [queryKeys.tracks.all] })
+      toast.success('Track created successfully!')
+      setShowForm(false)
+    },
+    onError: () => {
+      toast.error('Failed to create track')
+    },
+  })
+
+  const updateTrackMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateTrackRequest }) => 
+      tracksApi.updateTrack(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [queryKeys.tracks.all] })
+      toast.success('Track updated successfully!')
+      setEditingTrack(null)
+      setShowForm(false)
+    },
+    onError: () => {
+      toast.error('Failed to update track')
+    },
+  })
+
+  const deleteTrackMutation = useMutation({
+    mutationFn: tracksApi.deleteTrack,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [queryKeys.tracks.all] })
+      toast.success('Track deleted successfully!')
+    },
+    onError: () => {
+      toast.error('Failed to delete track')
+    },
+  })
 
   // Handle search results
   const handleSearchResults = (results: Track[]) => {
@@ -33,8 +81,41 @@ export default function TracksPage() {
   }
 
   const handleAddTrack = () => {
-    // TODO: Implement add track functionality
-    console.log('Add new track clicked')
+    setEditingTrack(null)
+    setShowForm(true)
+  }
+
+  const handleEditTrack = (track: Track) => {
+    setEditingTrack(track)
+    setShowForm(true)
+    setShowDetails(false)
+  }
+
+  const handleViewTrack = (track: Track) => {
+    setSelectedTrack(track)
+    setShowDetails(true)
+  }
+
+  const handleDeleteTrack = async (track: Track) => {
+    if (window.confirm('Are you sure you want to delete this track?')) {
+      await deleteTrackMutation.mutateAsync(track.id)
+    }
+  }
+
+  const handleFormSubmit = async (data: CreateTrackRequest | UpdateTrackRequest) => {
+    if (editingTrack) {
+      await updateTrackMutation.mutateAsync({ 
+        id: editingTrack.id, 
+        data: data as UpdateTrackRequest 
+      })
+    } else {
+      await createTrackMutation.mutateAsync(data as CreateTrackRequest)
+    }
+  }
+
+  const handleFormCancel = () => {
+    setShowForm(false)
+    setEditingTrack(null)
   }
 
   if (error) {
@@ -130,8 +211,21 @@ export default function TracksPage() {
                   </div>
 
                   <div className="flex gap-2 pt-2">
-                    <Button size="sm" className="flex-1">View</Button>
-                    <Button size="sm" variant="outline" className="flex-1">Edit</Button>
+                    <Button 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleViewTrack(track)}
+                    >
+                      View
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => handleEditTrack(track)}
+                    >
+                      Edit
+                    </Button>
                   </div>
                 </div>
               </Card>
@@ -146,6 +240,38 @@ export default function TracksPage() {
           )}
         </div>
       </div>
+
+      {/* Track Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-[496px] max-h-[90vh] overflow-y-auto relative">
+            {/* Close button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-12 top-8 z-10 p-1 h-auto w-auto bg-background/80 hover:bg-background"
+              onClick={handleFormCancel}
+            >
+              <X className="h-6 w-8 text-[#7F7E83]" />
+              <span className="sr-only">Close</span>
+            </Button>
+            <TrackForm
+              track={editingTrack || undefined}
+              onSubmit={handleFormSubmit}
+              isLoading={createTrackMutation.isPending || updateTrackMutation.isPending}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Track Details Modal */}
+      <TrackDetailsModal
+        track={selectedTrack}
+        isOpen={showDetails}
+        onClose={() => setShowDetails(false)}
+        onEdit={handleEditTrack}
+        onDelete={handleDeleteTrack}
+      />
     </div>
   )
 }
