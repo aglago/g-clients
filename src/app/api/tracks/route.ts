@@ -29,19 +29,30 @@ export async function POST(request: NextRequest) {
     await requireAdmin(request);
     
     const body = await request.json();
-    const { name, description, courses } = body;
+    const { name, price, duration, instructor, picture, description, courses } = body;
     
-    if (!name || !description || !Array.isArray(courses)) {
+    if (!name || !description || price === undefined || duration === undefined || !instructor || !picture) {
       return NextResponse.json(
-        { success: false, message: 'Name, description, and courses array are required' },
+        { success: false, message: 'Name, price, duration, instructor, picture, and description are required' },
+        { status: 400 }
+      );
+    }
+
+    if (courses !== undefined && !Array.isArray(courses)) {
+      return NextResponse.json(
+        { success: false, message: 'Courses must be an array if provided' },
         { status: 400 }
       );
     }
 
     const track = await trackService.createTrack({
       name,
+      price: Number(price),
+      duration: Number(duration),
+      instructor,
+      picture,
       description,
-      courses
+      courses: courses || []
     });
     
     return NextResponse.json(track, { status: 201 });

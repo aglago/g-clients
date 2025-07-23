@@ -14,8 +14,12 @@ export class TrackService {
 
   async createTrack(trackData: {
     name: string;
+    price: number;
+    duration: number;
+    instructor: string;
+    picture: string;
     description: string;
-    courses: string[];
+    courses?: string[];
   }): Promise<ITrack> {
     await connectMongoDB();
     const track = new Track(trackData);
@@ -53,6 +57,17 @@ export class TrackService {
       { $pull: { courses: courseId } },
       { new: true }
     ).populate('courses');
+  }
+
+  async searchTracks(query: string): Promise<ITrack[]> {
+    await connectMongoDB();
+    return await Track.find({
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { description: { $regex: query, $options: 'i' } },
+        { instructor: { $regex: query, $options: 'i' } }
+      ]
+    }).populate('courses').sort({ createdAt: -1 });
   }
 }
 
