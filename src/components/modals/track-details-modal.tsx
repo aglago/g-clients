@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -62,19 +63,16 @@ export default function TrackDetailsModal({
         <div className="space-y-6">
           {/* Track Image */}
           {track.picture && (
-            <div className="w-full h-48 bg-muted rounded-lg overflow-hidden">
-              <img
+            <div className="w-full h-48 bg-muted rounded-lg overflow-hidden relative">
+              <Image
                 src={track.picture}
                 alt={track.name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  target.parentElement!.innerHTML = `
-                    <div class="w-full h-full flex items-center justify-center bg-muted">
-                      <span class="text-muted-foreground">Image not available</span>
-                    </div>
-                  `;
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                onError={() => {
+                  // Handle error by showing fallback
+                  console.log('Failed to load image:', track.picture);
                 }}
               />
             </div>
