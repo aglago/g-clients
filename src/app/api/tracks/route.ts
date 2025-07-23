@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { trackService } from '@/lib/services';
 import { requireAuth, requireAdmin } from '@/lib/auth';
+import { transformTrackDocuments, transformTrackDocument } from '@/lib/transformers';
 
 export async function GET(request: NextRequest) {
   try {
     await requireAuth(request);
     
     const tracks = await trackService.getAllTracks();
+    const transformedTracks = transformTrackDocuments(tracks);
     
-    return NextResponse.json(tracks);
+    return NextResponse.json(transformedTracks);
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json(
@@ -55,7 +57,8 @@ export async function POST(request: NextRequest) {
       courses: courses || []
     });
     
-    return NextResponse.json(track, { status: 201 });
+    const transformedTrack = transformTrackDocument(track);
+    return NextResponse.json(transformedTrack, { status: 201 });
   } catch (error) {
     if (error instanceof Error && (error.message === 'Unauthorized' || error.message === 'Forbidden: Admin access required')) {
       return NextResponse.json(

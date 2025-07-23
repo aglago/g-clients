@@ -4,6 +4,7 @@ import { requireAuth, requireAdmin } from '@/lib/auth';
 import { Types } from 'mongoose';
 import { deleteFromCloudinary } from '@/lib/cloudinary';
 import { getCloudinaryPublicId } from '@/lib/upload';
+import { transformTrackDocument } from '@/lib/transformers';
 
 export async function GET(
   request: NextRequest,
@@ -22,7 +23,8 @@ export async function GET(
       );
     }
     
-    return NextResponse.json(track);
+    const transformedTrack = transformTrackDocument(track);
+    return NextResponse.json(transformedTrack);
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json(
@@ -97,7 +99,15 @@ export async function PUT(
 
     const updatedTrack = await trackService.updateTrack(id, updates);
     
-    return NextResponse.json(updatedTrack);
+    if (!updatedTrack) {
+      return NextResponse.json(
+        { success: false, message: 'Track not found' },
+        { status: 404 }
+      );
+    }
+    
+    const transformedTrack = transformTrackDocument(updatedTrack);
+    return NextResponse.json(transformedTrack);
   } catch (error) {
     if (error instanceof Error && (error.message === 'Unauthorized' || error.message === 'Forbidden: Admin access required')) {
       return NextResponse.json(
