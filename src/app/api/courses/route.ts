@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { courseService } from '@/lib/services';
 import { requireAuth, requireAdmin } from '@/lib/auth';
+import { transformCourseDocuments, transformCourseDocument } from '@/lib/transformers';
 
 export async function GET(request: NextRequest) {
   try {
     await requireAuth(request);
     
     const courses = await courseService.getAllCourses();
+    const transformedCourses = transformCourseDocuments(courses);
     
-    return NextResponse.json(courses);
+    return NextResponse.json(transformedCourses);
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json(
@@ -29,38 +31,24 @@ export async function POST(request: NextRequest) {
     await requireAdmin(request);
     
     const body = await request.json();
-    const { title, description, instructor, duration, price } = body;
+    const { title, track, picture, description } = body;
     
-    if (!title || !description || !instructor || !duration || !price) {
+    if (!title || !track || !picture || !description) {
       return NextResponse.json(
-        { success: false, message: 'All fields are required' },
-        { status: 400 }
-      );
-    }
-
-    if (typeof duration !== 'number' || duration <= 0) {
-      return NextResponse.json(
-        { success: false, message: 'Duration must be a positive number' },
-        { status: 400 }
-      );
-    }
-
-    if (typeof price !== 'number' || price < 0) {
-      return NextResponse.json(
-        { success: false, message: 'Price must be a non-negative number' },
+        { success: false, message: 'Title, track, picture, and description are required' },
         { status: 400 }
       );
     }
 
     const course = await courseService.createCourse({
       title,
-      description,
-      instructor,
-      duration,
-      price
+      track,
+      picture,
+      description
     });
     
-    return NextResponse.json(course, { status: 201 });
+    const transformedCourse = transformCourseDocument(course);
+    return NextResponse.json(transformedCourse, { status: 201 });
   } catch (error) {
     if (error instanceof Error && (error.message === 'Unauthorized' || error.message === 'Forbidden: Admin access required')) {
       return NextResponse.json(
