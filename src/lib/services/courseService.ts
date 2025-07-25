@@ -1,5 +1,6 @@
 import connectMongoDB from '../mongodb';
 import { Course, type ICourse } from '../models';
+import { Types } from 'mongoose';
 
 export class CourseService {
   async getAllCourses(): Promise<ICourse[]> {
@@ -14,17 +15,24 @@ export class CourseService {
 
   async createCourse(courseData: {
     title: string;
+    track: string;
+    picture: string;
     description: string;
-    instructor: string;
-    duration: number;
-    price: number;
   }): Promise<ICourse> {
     await connectMongoDB();
-    const course = new Course(courseData);
+    const course = new Course({
+      ...courseData,
+      track: new Types.ObjectId(courseData.track)
+    });
     return await course.save();
   }
 
-  async updateCourse(id: string, updates: Partial<ICourse>): Promise<ICourse | null> {
+  async updateCourse(id: string, updates: Partial<{
+    title: string;
+    track: Types.ObjectId;
+    picture: string;
+    description: string;
+  }>): Promise<ICourse | null> {
     await connectMongoDB();
     return await Course.findByIdAndUpdate(
       id,
@@ -44,8 +52,7 @@ export class CourseService {
     return await Course.find({
       $or: [
         { title: { $regex: query, $options: 'i' } },
-        { description: { $regex: query, $options: 'i' } },
-        { instructor: { $regex: query, $options: 'i' } }
+        { description: { $regex: query, $options: 'i' } }
       ]
     }).sort({ createdAt: -1 });
   }
