@@ -186,27 +186,30 @@ const authApi = {
 export interface Course {
   id: string;
   title: string;
-  track: string;
+  track: string; // Track ID that the course belongs to
   picture: string;
   description: string;
   createdAt: string;
   updatedAt: string;
 }
 
+// Course with populated track data for display
+export interface CourseWithTrack extends Omit<Course, 'track'> {
+  track: Track; // Full track object
+}
+
 export interface CreateCourseRequest {
   title: string;
+  track: string; // Track ID
+  picture: string;
   description: string;
-  instructor: string;
-  duration: number;
-  price: number;
 }
 
 export interface UpdateCourseRequest {
   title?: string;
+  track?: string; // Track ID
+  picture?: string;
   description?: string;
-  instructor?: string;
-  duration?: number;
-  price?: number;
 }
 
 const coursesApi = {
