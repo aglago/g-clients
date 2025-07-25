@@ -1,10 +1,11 @@
 import { ITrack } from './models/Track';
-import { Track } from './api';
+import { ICourse } from './models/Course';
+import { Track, Course } from './api';
 
 // Transform MongoDB Track document to frontend Track interface
 export function transformTrackDocument(track: ITrack): Track {
   return {
-    id: track._id.toString(),
+    id: (track._id as unknown as string).toString(),
     name: track.name,
     price: track.price,
     duration: track.duration,
@@ -22,4 +23,22 @@ export function transformTrackDocument(track: ITrack): Track {
 // Transform array of MongoDB Track documents
 export function transformTrackDocuments(tracks: ITrack[]): Track[] {
   return tracks.map(transformTrackDocument);
+}
+
+// Transform MongoDB Course document to frontend Course interface
+export function transformCourseDocument(course: ICourse): Course {
+  return {
+    id: (course._id as unknown as string).toString(),
+    title: course.title,
+    track: course.track.toString(),
+    picture: course.picture,
+    description: course.description,
+    createdAt: course.createdAt.toISOString(),
+    updatedAt: course.updatedAt.toISOString(),
+  };
+}
+
+// Transform array of MongoDB Course documents
+export function transformCourseDocuments(courses: ICourse[]): Course[] {
+  return courses.map(transformCourseDocument);
 }

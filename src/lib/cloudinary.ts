@@ -15,7 +15,7 @@ export async function uploadToCloudinary(
   options: {
     folder?: string;
     public_id?: string;
-    transformation?: any;
+    transformation?: Record<string, unknown>;
   } = {}
 ): Promise<{
   public_id: string;
@@ -57,7 +57,7 @@ export async function uploadToCloudinary(
 // Delete function for cleanup
 export async function deleteFromCloudinary(publicId: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.destroy(publicId, (error, result) => {
+    cloudinary.uploader.destroy(publicId, (error) => {
       if (error) {
         reject(error);
       } else {
