@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { invoicesApi, learnersApi } from "@/lib/api";
+import { invoicesApi, learnersApi, tracksApi, queryKeys } from "@/lib/api";
 import OverviewCard from "@/components/dashboard/overview-cards";
 import Trackcard from "@/components/dashboard/track-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,36 +26,13 @@ export default function DashboardPage() {
     queryFn: invoicesApi.getAllInvoices,
   });
 
+  const { data: tracks = [], isLoading: tracksLoading } = useQuery({
+    queryKey: [queryKeys.tracks.all],
+    queryFn: tracksApi.getAllTracks,
+  });
+
   // Calculate overview metrics using helper functions
   const metrics = calculateDashboardMetrics(learners, invoices);
-
-  // Mock data for tracks (since we don't have tracks API yet)
-  const mockTracks = [
-    {
-      title: "Software Engineering",
-      weeks: "12",
-      courses: ["Nodejs", "Reactjs"],
-      imageUrl: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=300&h=200&fit=crop"
-    },
-    {
-      title: "Cloud Computing", 
-      weeks: "12",
-      courses: ["Azure", "AWS", "Machine Learning"],
-      imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=300&h=200&fit=crop"
-    },
-    {
-      title: "Data Science",
-      weeks: "8", 
-      courses: ["PowerBi", "Python", "User Research"],
-      imageUrl: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=300&h=200&fit=crop"
-    },
-    {
-      title: "UI/UX Design",
-      weeks: "8", 
-      courses: ["Figma", "Sketch", "User Research"],
-      imageUrl: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=300&h=200&fit=crop"
-    }
-  ];
 
   // Latest invoices for table
   const latestInvoices = invoices.slice(0, 5);
@@ -103,15 +80,32 @@ export default function DashboardPage() {
       <div>
         <h3 className="text-lg font-semibold mb-4">Tracks</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {mockTracks.map((track, index) => (
-            <Trackcard
-              key={index}
-              title={track.title}
-              weeks={track.weeks}
-              courses={track.courses}
-              imageUrl={track.imageUrl}
-            />
-          ))}
+          {tracksLoading ? (
+            // Loading skeletons
+            Array.from({ length: 4 }).map((_, index) => (
+              <Card key={index} className="rounded-[20px] shadow-lg overflow-hidden p-0">
+                <div className="space-y-4">
+                  <div className="h-[180px] bg-muted rounded-t-md animate-pulse" />
+                  <div className="px-4 space-y-3">
+                    <div className="h-6 bg-muted rounded animate-pulse" />
+                    <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
+                    <div className="h-4 bg-muted rounded animate-pulse w-1/2" />
+                  </div>
+                </div>
+              </Card>
+            ))
+          ) : tracks.length > 0 ? (
+            tracks.slice(0, 4).map((track) => (
+              <Trackcard
+                key={track.id}
+                track={track}
+              />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-8">
+              <p className="text-muted-foreground">No tracks available</p>
+            </div>
+          )}
         </div>
       </div>
 
