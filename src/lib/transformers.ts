@@ -15,7 +15,7 @@ export function transformTrackDocument(track: ITrack): Track {
     courses: track.courses ? track.courses.map(course => {
       // If course is populated, extract the title. If not, return the ObjectId as string
       if (typeof course === 'object' && course !== null && 'title' in course) {
-        return (course as any).title;
+        return (course as { title: string }).title;
       }
       return course.toString();
     }) : [],
