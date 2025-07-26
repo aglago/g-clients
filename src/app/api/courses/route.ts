@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { courseService } from '@/lib/services';
+import { courseService, trackService } from '@/lib/services';
 import { requireAuth, requireAdmin } from '@/lib/auth';
 import { transformCourseDocuments, transformCourseDocument } from '@/lib/transformers';
+import { Types } from 'mongoose';
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,6 +47,14 @@ export async function POST(request: NextRequest) {
       picture,
       description
     });
+
+    // Add the course to the track's courses array
+    const trackDoc = await trackService.getTrackById(track);
+    if (trackDoc) {
+      const courseObjectId = course._id as Types.ObjectId;
+      const updatedCourses = [...(trackDoc.courses || []), courseObjectId];
+      await trackService.updateTrack(track, { courses: updatedCourses });
+    }
     
     const transformedCourse = transformCourseDocument(course);
     return NextResponse.json(transformedCourse, { status: 201 });

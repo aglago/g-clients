@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { courseService } from '@/lib/services';
+import { courseService, trackService } from '@/lib/services';
 import { requireAuth, requireAdmin } from '@/lib/auth';
 import { transformCourseDocument } from '@/lib/transformers';
 import { Types } from 'mongoose';
@@ -78,6 +78,26 @@ export async function PUT(
       );
     }
 
+    // Handle track change - remove from old track and add to new track
+    if (track !== undefined && track !== course.track.toString()) {
+      // Remove from old track
+      const oldTrackDoc = await trackService.getTrackById(course.track.toString());
+      if (oldTrackDoc && oldTrackDoc.courses) {
+        const updatedOldCourses = oldTrackDoc.courses.filter(
+          courseId => courseId.toString() !== id
+        );
+        await trackService.updateTrack(course.track.toString(), { courses: updatedOldCourses });
+      }
+
+      // Add to new track
+      const newTrackDoc = await trackService.getTrackById(track);
+      if (newTrackDoc) {
+        const courseObjectId = new Types.ObjectId(id);
+        const updatedNewCourses = [...(newTrackDoc.courses || []), courseObjectId];
+        await trackService.updateTrack(track, { courses: updatedNewCourses });
+      }
+    }
+
     const updatedCourse = await courseService.updateCourse(id, updates);
     
     if (!updatedCourse) {
@@ -118,6 +138,15 @@ export async function DELETE(
         { success: false, message: 'Course not found' },
         { status: 404 }
       );
+    }
+
+    // Remove course from track's courses array
+    const trackDoc = await trackService.getTrackById(course.track.toString());
+    if (trackDoc && trackDoc.courses) {
+      const updatedCourses = trackDoc.courses.filter(
+        courseId => courseId.toString() !== id
+      );
+      await trackService.updateTrack(course.track.toString(), { courses: updatedCourses });
     }
 
     // Delete course image from Cloudinary if exists
