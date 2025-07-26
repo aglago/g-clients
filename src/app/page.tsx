@@ -1,21 +1,25 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 
 export default function Home() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const pathname = usePathname();
+  const { isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
+    // Only redirect if we're actually on the root path and not loading
+    if (pathname !== '/' || isLoading) return;
+    
     // Redirect based on authentication status
     if (isAuthenticated) {
-      router.push('/dashboard');
+      router.replace('/dashboard');
     } else {
-      router.push('/auth/login');
+      router.replace('/auth/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, pathname, router]);
 
   // Show loading while redirecting
   return (
