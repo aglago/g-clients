@@ -37,6 +37,7 @@ export default function CoursesPage() {
     mutationFn: coursesApi.createCourse,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKeys.courses.all] })
+      queryClient.invalidateQueries({ queryKey: [queryKeys.tracks.all] })
       toast.success('Course created successfully!')
       setShowForm(false)
     },
@@ -50,6 +51,7 @@ export default function CoursesPage() {
       coursesApi.updateCourse(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKeys.courses.all] })
+      queryClient.invalidateQueries({ queryKey: [queryKeys.tracks.all] })
       toast.success('Course updated successfully!')
       setEditingCourse(null)
       setShowForm(false)
@@ -63,6 +65,7 @@ export default function CoursesPage() {
     mutationFn: coursesApi.deleteCourse,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKeys.courses.all] })
+      queryClient.invalidateQueries({ queryKey: [queryKeys.tracks.all] })
       toast.success('Course deleted successfully!')
     },
     onError: () => {
