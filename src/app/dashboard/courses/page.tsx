@@ -1,21 +1,74 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import PagesHeaders from '@/components/dashboard/pages-headers'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { coursesApi, Course, queryKeys } from '@/lib/api'
+import { X, Tag } from 'lucide-react'
+import CourseForm from '@/components/forms/course-form'
+import CourseDetailsModal from '@/components/modals/course-details-modal'
+import { coursesApi, Course, queryKeys, CreateCourseRequest, UpdateCourseRequest, tracksApi, Track } from '@/lib/api'
+import Image from 'next/image'
 
 export default function CoursesPage() {
+  const queryClient = useQueryClient()
+  const [showForm, setShowForm] = useState(false)
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null)
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
+  const [showDetails, setShowDetails] = useState(false)
+  
   // Fetch courses using TanStack Query
   const { data: courses = [], isLoading, error } = useQuery({
     queryKey: [queryKeys.courses.all],
     queryFn: coursesApi.getAllCourses,
   })
 
+  // Fetch tracks for display
+  const { data: tracks = [] } = useQuery({
+    queryKey: [queryKeys.tracks.all],
+    queryFn: tracksApi.getAllTracks,
+  })
+
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
+
+  // Mutations for CRUD operations
+  const createCourseMutation = useMutation({
+    mutationFn: coursesApi.createCourse,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [queryKeys.courses.all] })
+      toast.success('Course created successfully!')
+      setShowForm(false)
+    },
+    onError: () => {
+      toast.error('Failed to create course')
+    },
+  })
+
+  const updateCourseMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateCourseRequest }) => 
+      coursesApi.updateCourse(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [queryKeys.courses.all] })
+      toast.success('Course updated successfully!')
+      setEditingCourse(null)
+      setShowForm(false)
+    },
+    onError: () => {
+      toast.error('Failed to update course')
+    },
+  })
+
+  const deleteCourseMutation = useMutation({
+    mutationFn: coursesApi.deleteCourse,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [queryKeys.courses.all] })
+      toast.success('Course deleted successfully!')
+    },
+    onError: () => {
+      toast.error('Failed to delete course')
+    },
+  })
 
   // Handle search results
   const handleSearchResults = (results: Course[]) => {
@@ -24,16 +77,56 @@ export default function CoursesPage() {
 
   // Function to extract searchable text from course items
   const getCourseSearchableText = (course: Course): string[] => {
+    const track = tracks.find((t: Track) => t.id === course.track)
     return [
       course.title || '',
       course.description || '',
-      course.track || '',
+      track?.name || '',
+      track?.instructor || '',
     ].filter(Boolean)
   }
 
   const handleAddCourse = () => {
-    // TODO: Implement add course functionality
-    console.log('Add new course clicked')
+    setEditingCourse(null)
+    setShowForm(true)
+  }
+
+  const handleEditCourse = (course: Course) => {
+    setEditingCourse(course)
+    setShowForm(true)
+    setShowDetails(false)
+  }
+
+  const handleViewCourse = (course: Course) => {
+    setSelectedCourse(course)
+    setShowDetails(true)
+  }
+
+  const handleDeleteCourse = async (course: Course) => {
+    if (window.confirm('Are you sure you want to delete this course?')) {
+      await deleteCourseMutation.mutateAsync(course.id)
+    }
+  }
+
+  const handleFormSubmit = async (data: CreateCourseRequest | UpdateCourseRequest) => {
+    if (editingCourse) {
+      await updateCourseMutation.mutateAsync({ 
+        id: editingCourse.id, 
+        data: data as UpdateCourseRequest 
+      })
+    } else {
+      await createCourseMutation.mutateAsync(data as CreateCourseRequest)
+    }
+  }
+
+  const handleFormCancel = () => {
+    setShowForm(false)
+    setEditingCourse(null)
+  }
+
+  const getTrackName = (trackId: string) => {
+    const track = tracks.find((t: Track) => t.id === trackId)
+    return track?.name || 'Unknown Track'
   }
 
   if (error) {
@@ -41,7 +134,7 @@ export default function CoursesPage() {
       <div>
         <PagesHeaders
           heading="Manage Courses"
-          subheading="Browse and manage all available courses"
+          subheading="Filter, sort, and access detailed courses"
           items={[]}
           getSearchableText={getCourseSearchableText}
           onSearchResults={handleSearchResults}
@@ -61,7 +154,7 @@ export default function CoursesPage() {
     <div>
       <PagesHeaders
         heading="Manage Courses"
-        subheading="Browse and manage all available courses"
+        subheading="Filter, sort, and access detailed courses"
         items={courses}
         getSearchableText={getCourseSearchableText}
         onSearchResults={handleSearchResults}
@@ -88,10 +181,10 @@ export default function CoursesPage() {
           {isLoading ? (
             // Loading skeletons
             Array.from({ length: 6 }).map((_, index) => (
-              <Card key={index} className="p-6">
+              <div key={index} className="bg-background border rounded-lg p-6 shadow-sm">
                 <div className="space-y-4">
+                  <div className="h-32 bg-muted rounded animate-pulse" />
                   <div className="h-6 bg-muted rounded animate-pulse" />
-                  <div className="h-4 bg-muted rounded animate-pulse w-20" />
                   <div className="h-4 bg-muted rounded animate-pulse" />
                   <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
                   <div className="flex gap-2">
@@ -99,45 +192,59 @@ export default function CoursesPage() {
                     <div className="h-8 bg-muted rounded animate-pulse flex-1" />
                   </div>
                 </div>
-              </Card>
+              </div>
             ))
           ) : filteredCourses.length > 0 ? (
-            // Course cards
+            // Course tiles
             filteredCourses.map((course) => (
-              <Card key={course.id} className="p-6">
+              <div key={course.id} className="bg-background border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
                 <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-lg">{course.title}</h3>
-                    {course.track && (
-                      <Badge variant="secondary" className="mt-2">
-                        {course.track}
-                      </Badge>
-                    )}
-                  </div>
-                  
+                  {/* Course Image */}
                   {course.picture && (
-                    <div className="w-full h-32 bg-muted rounded-md flex items-center justify-center">
-                      <span className="text-muted-foreground text-sm">Course Image</span>
+                    <div className="relative w-full h-32 rounded-lg overflow-hidden">
+                      <Image
+                        src={course.picture}
+                        alt={course.title}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                   )}
                   
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {course.description}
-                  </p>
-
-                  <div className="text-xs text-muted-foreground space-y-1">
-                    <p>Created: {new Date(course.createdAt).toLocaleDateString()}</p>
-                    {course.updatedAt !== course.createdAt && (
-                      <p>Updated: {new Date(course.updatedAt).toLocaleDateString()}</p>
-                    )}
+                  <div>
+                    <h3 className="font-semibold text-lg">{course.title}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {course.description}
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Tag className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Track:</span>
+                      <span>{getTrackName(course.track)}</span>
+                    </div>
                   </div>
 
                   <div className="flex gap-2 pt-2">
-                    <Button size="sm" className="flex-1">View</Button>
-                    <Button size="sm" variant="outline" className="flex-1">Edit</Button>
+                    <Button 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleViewCourse(course)}
+                    >
+                      View
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => handleEditCourse(course)}
+                    >
+                      Edit
+                    </Button>
                   </div>
                 </div>
-              </Card>
+              </div>
             ))
           ) : (
             // No results
@@ -149,6 +256,38 @@ export default function CoursesPage() {
           )}
         </div>
       </div>
+
+      {/* Course Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-[496px] max-h-[90vh] overflow-y-auto relative">
+            {/* Close button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-12 top-8 z-10 p-1 h-auto w-auto bg-background/80 hover:bg-background"
+              onClick={handleFormCancel}
+            >
+              <X className="h-6 w-8 text-[#7F7E83]" />
+              <span className="sr-only">Close</span>
+            </Button>
+            <CourseForm
+              course={editingCourse || undefined}
+              onSubmit={handleFormSubmit}
+              isLoading={createCourseMutation.isPending || updateCourseMutation.isPending}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Course Details Modal */}
+      <CourseDetailsModal
+        course={selectedCourse}
+        isOpen={showDetails}
+        onClose={() => setShowDetails(false)}
+        onEdit={handleEditCourse}
+        onDelete={handleDeleteCourse}
+      />
     </div>
   )
 }
