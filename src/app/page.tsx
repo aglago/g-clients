@@ -13,12 +13,17 @@ export default function Home() {
     // Only redirect if we're actually on the root path and not loading
     if (pathname !== '/' || isLoading) return;
     
-    // Redirect based on authentication status
-    if (isAuthenticated) {
-      router.replace('/dashboard');
-    } else {
-      router.replace('/auth/login');
-    }
+    // Add a small delay to ensure we don't interfere with direct page loads
+    const timer = setTimeout(() => {
+      // Redirect based on authentication status
+      if (isAuthenticated) {
+        router.replace('/dashboard');
+      } else {
+        router.replace('/auth/login');
+      }
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [isAuthenticated, isLoading, pathname, router]);
 
   // Show loading while redirecting

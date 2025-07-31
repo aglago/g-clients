@@ -25,14 +25,19 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       // If no token or not authenticated, redirect to login
       if (!token || !isAuthenticated) {
         console.log('AuthGuard - redirecting to login')
-        router.replace('/auth/login')
+        // Only redirect if we're not already on an auth page
+        if (!window.location.pathname.startsWith('/auth/')) {
+          router.replace('/auth/login')
+        }
         return
       }
 
       setIsChecking(false)
     }
 
-    checkAuth()
+    // Add a small delay to prevent interference with navigation
+    const timer = setTimeout(checkAuth, 50)
+    return () => clearTimeout(timer)
   }, [isAuthenticated, token, isLoading, router])
 
   // Show loading spinner while checking authentication
