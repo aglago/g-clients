@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import PagesHeaders from "@/components/dashboard/pages-headers";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { X } from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import TrackForm from "@/components/forms/track-form";
 import TrackDetailsModal from "@/components/modals/track-details-modal";
 import {
@@ -36,6 +36,8 @@ export default function TracksPage() {
   });
 
   const [filteredTracks, setFilteredTracks] = useState<Track[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   // Mutations for CRUD operations
   const createTrackMutation = useMutation({
@@ -78,6 +80,27 @@ export default function TracksPage() {
   // Handle search results
   const handleSearchResults = (results: Track[]) => {
     setFilteredTracks(results);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredTracks.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentTracks = useMemo(() => {
+    return filteredTracks.slice(startIndex, endIndex);
+  }, [filteredTracks, startIndex, endIndex]);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
   };
 
   // Function to extract searchable text from track items
@@ -175,8 +198,8 @@ export default function TracksPage() {
             <span>Loading tracks...</span>
           ) : (
             <span>
-              Showing {filteredTracks.length} of {tracks.length} track
-              {tracks.length !== 1 ? "s" : ""}
+              Showing {startIndex + 1} to {Math.min(endIndex, filteredTracks.length)} of {filteredTracks.length} track
+              {filteredTracks.length !== 1 ? "s" : ""} (Page {currentPage}/{totalPages})
             </span>
           )}
         </div>
@@ -198,9 +221,9 @@ export default function TracksPage() {
                 </div>
               </Card>
             ))
-          ) : filteredTracks.length > 0 ? (
+          ) : currentTracks.length > 0 ? (
             // Track cards
-            filteredTracks.map((track) => (
+            currentTracks.map((track) => (
               <div key={track.id} className="cursor-pointer" onClick={() => handleViewTrack(track)}>
                 <Trackcard track={track} />
               </div>
@@ -216,6 +239,37 @@ export default function TracksPage() {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {!isLoading && filteredTracks.length > itemsPerPage && (
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-2">
+            <div className="text-sm text-muted-foreground flex-shrink-0">
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex items-center justify-center sm:justify-end space-x-2 flex-shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className="flex items-center gap-1 min-w-0"
+              >
+                <ChevronLeft className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline">Previous</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-1 min-w-0"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="h-4 w-4 flex-shrink-0" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Track Form Modal */}
