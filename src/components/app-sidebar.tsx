@@ -2,7 +2,6 @@
 
 import { 
   LayoutDashboard, 
-  Users, 
   BookOpen, 
   Route, 
   FileText,
@@ -10,6 +9,9 @@ import {
   LogOut,
   User
 } from "lucide-react";
+
+import { HiOutlineUserGroup } from "react-icons/hi2";
+
 
 import {
   Sidebar,
@@ -42,7 +44,7 @@ const items = [
   {
     title: "Learners",
     url: "/dashboard/learners",
-    icon: Users,
+    icon: HiOutlineUserGroup,
   },
   {
     title: "Tracks",
