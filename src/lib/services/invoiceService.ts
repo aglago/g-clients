@@ -32,10 +32,16 @@ export class InvoiceService {
     courseId?: string;
     trackId?: string;
     amount: number;
-    status?: 'pending' | 'paid' | 'cancelled';
+    dueDate: string | Date;
+    paymentDetails: string;
+    status?: 'unpaid' | 'paid' | 'cancelled';
   }): Promise<IInvoice> {
     await connectMongoDB();
-    const invoice = new Invoice(invoiceData);
+    const invoice = new Invoice({
+      ...invoiceData,
+      dueDate: new Date(invoiceData.dueDate),
+      status: invoiceData.status || 'unpaid'
+    });
     return await invoice.save();
   }
 

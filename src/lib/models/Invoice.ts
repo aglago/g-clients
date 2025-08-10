@@ -5,7 +5,9 @@ export interface IInvoice extends Document {
   courseId?: mongoose.Types.ObjectId;
   trackId?: mongoose.Types.ObjectId;
   amount: number;
-  status: 'pending' | 'paid' | 'cancelled';
+  status: 'unpaid' | 'paid' | 'cancelled';
+  dueDate: Date;
+  paymentDetails: string;
   paymentDate?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -16,7 +18,9 @@ const InvoiceSchema = new Schema<IInvoice>({
   courseId: { type: Schema.Types.ObjectId, ref: 'Course' },
   trackId: { type: Schema.Types.ObjectId, ref: 'Track' },
   amount: { type: Number, required: true },
-  status: { type: String, enum: ['pending', 'paid', 'cancelled'], default: 'pending' },
+  status: { type: String, enum: ['unpaid', 'paid', 'cancelled'], default: 'unpaid' },
+  dueDate: { type: Date, required: true },
+  paymentDetails: { type: String, required: true },
   paymentDate: { type: Date },
 }, {
   timestamps: true,

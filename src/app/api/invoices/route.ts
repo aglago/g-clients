@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     await requireAdmin(request);
     
     const body = await request.json();
-    const { learnerId, courseId, trackId, amount } = body;
+    const { learnerId, amount, dueDate, status, paymentDetails } = body;
     
     if (!learnerId || !amount || typeof amount !== 'number' || amount < 0) {
       return NextResponse.json(
@@ -38,19 +38,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!courseId && !trackId) {
+    if (!dueDate) {
       return NextResponse.json(
-        { success: false, message: 'Either courseId or trackId must be provided' },
+        { success: false, message: 'Due date is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!status || !['paid', 'unpaid', 'cancelled'].includes(status)) {
+      return NextResponse.json(
+        { success: false, message: 'Valid status is required (paid, unpaid, or cancelled)' },
+        { status: 400 }
+      );
+    }
+
+    if (!paymentDetails) {
+      return NextResponse.json(
+        { success: false, message: 'Payment details are required' },
         { status: 400 }
       );
     }
 
     const invoice = await invoiceService.createInvoice({
       learnerId,
-      courseId,
-      trackId,
       amount,
-      status: 'pending'
+      dueDate,
+      status,
+      paymentDetails
     });
     
     return NextResponse.json(invoice, { status: 201 });
