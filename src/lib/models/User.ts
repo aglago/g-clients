@@ -7,6 +7,7 @@ export interface IUser extends Document {
   password: string;
   role: 'admin' | 'learner';
   contact?: string;
+  profileImage?: string;
   isVerified: boolean;
   verificationOTP?: string;
   verificationOTPExpiry?: Date;
@@ -23,6 +24,7 @@ const UserSchema = new Schema<IUser>({
   password: { type: String, required: true },
   role: { type: String, enum: ['admin', 'learner'], required: true },
   contact: { type: String },
+  profileImage: { type: String },
   isVerified: { type: Boolean, default: false },
   verificationOTP: { type: String },
   verificationOTPExpiry: { type: Date },

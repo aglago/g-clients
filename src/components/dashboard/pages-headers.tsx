@@ -18,6 +18,7 @@ interface PagesHeadersProps<T> {
   onAddClick?: () => void;
   isLoading?: boolean;
   showAddButton?: boolean;
+  showSearch?: boolean;
 }
 
 export default function PagesHeaders<T>({
@@ -31,6 +32,7 @@ export default function PagesHeaders<T>({
   onAddClick,
   isLoading = false,
   showAddButton = true,
+  showSearch = true,
 }: PagesHeadersProps<T>) {
   const searchRef = useRef<SearchRef>(null);
 
@@ -49,30 +51,34 @@ export default function PagesHeaders<T>({
         <p className="text-[18px] text-muted-foreground">{subheading}</p>
       </div>
 
-      <div className="flex flex-col gap-6">
-        {/* Search Section */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex-1 w-full max-w-md">
-            <Search
-              ref={searchRef}
-              items={items}
-              getSearchableText={getSearchableText}
-              onSearchResults={onSearchResults}
-              placeholder={searchPlaceholder}
-              className="w-full"
-            />
-          </div>
+      {(showSearch || showAddButton) && (
+        <div className="flex flex-col gap-6">
+          {/* Search Section */}
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+            {showSearch && (
+              <div className="flex-1 w-full max-w-md">
+                <Search
+                  ref={searchRef}
+                  items={items}
+                  getSearchableText={getSearchableText}
+                  onSearchResults={onSearchResults}
+                  placeholder={searchPlaceholder}
+                  className="w-full"
+                />
+              </div>
+            )}
 
-          {showAddButton && (
-            <div className="flex">
-              <Button onClick={handleAddClick} disabled={isLoading}>
-                <Plus className="size-4 mr-2" />
-                {addButtonText}
-              </Button>
-            </div>
-          )}
+            {showAddButton && (
+              <div className="flex">
+                <Button onClick={handleAddClick} disabled={isLoading}>
+                  <Plus className="size-4 mr-2" />
+                  {addButtonText}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

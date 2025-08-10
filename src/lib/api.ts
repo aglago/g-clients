@@ -108,6 +108,7 @@ export interface UpdateProfileRequest {
   firstName?: string;
   lastName?: string;
   contact?: string;
+  profileImage?: string;
 }
 
 export interface AuthResponse {
@@ -122,6 +123,7 @@ export interface AuthResponse {
     email: string;
     role: string;
     contact?: string;
+    profileImage?: string;
   };
 }
 

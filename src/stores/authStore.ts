@@ -19,6 +19,7 @@ interface AdminAuthState {
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string, confirmPassword: string) => Promise<void>;
   updatePassword: (currentPassword: string, newPassword: string, confirmPassword: string) => Promise<void>;
+  updateProfile: (firstName: string, lastName: string, contact?: string, profileImage?: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -192,6 +193,26 @@ export const useAuthStore = create<AdminAuthState>()(
           await authApi.updatePassword({ currentPassword, newPassword, confirmPassword });
           set({ isLoading: false });
           toast.success('Password updated successfully!');
+        } catch (error) {
+          set({ isLoading: false });
+          toast.error(handleApiError(error));
+          throw error;
+        }
+      },
+
+      updateProfile: async (firstName, lastName, contact, profileImage) => {
+        try {
+          set({ isLoading: true });
+          const response = await authApi.updateProfile({ firstName, lastName, contact, profileImage });
+          
+          // Update user data in store
+          set((state) => ({ 
+            ...state,
+            user: response.user || state.user,
+            isLoading: false 
+          }));
+          
+          toast.success('Profile updated successfully!');
         } catch (error) {
           set({ isLoading: false });
           toast.error(handleApiError(error));
