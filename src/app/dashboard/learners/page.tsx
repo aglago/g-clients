@@ -98,7 +98,17 @@ const mockLearners: Learner[] = [
   },
 ]
 
-export default function LearnersPage() {
+// Helper function to map mock trackIds to real tracks
+const getMockTrackForLearner = (mockTrackId: string, realTracks: Track[]): Track | undefined => {
+  if (!realTracks.length) return undefined
+  
+  // Map mock trackIds to real tracks by index
+  const trackIndex = parseInt(mockTrackId) - 1 // '1' -> 0, '2' -> 1, '3' -> 2
+  return realTracks[trackIndex] || realTracks[0] // fallback to first track
+}
+
+export default function 
+Page() {
   const [selectedLearner, setSelectedLearner] = useState<Learner | null>(null)
   const [showDetailsModal, setShowDetailsModal] = useState(false)
   
@@ -134,7 +144,8 @@ export default function LearnersPage() {
 
   // Function to extract searchable text from learner items
   const getLearnerSearchableText = (learner: Learner): string[] => {
-    const track = tracks.find((t: Track) => t.id === learner.trackId)
+    // const track = tracks.find((t: Track) => t.id === learner.trackId)
+    const track = getMockTrackForLearner(learner.trackId || '', tracks)
     return [
       learner.firstName || '',
       learner.lastName || '',
@@ -393,7 +404,7 @@ export default function LearnersPage() {
           learner={selectedLearner}
           isOpen={showDetailsModal}
           onClose={handleCloseModal}
-          track={selectedLearner?.trackId ? tracks.find(t => t.id === selectedLearner.trackId) : undefined}
+          track={selectedLearner?.trackId ? getMockTrackForLearner(selectedLearner.trackId, tracks) : undefined}
         />
       )}
 
