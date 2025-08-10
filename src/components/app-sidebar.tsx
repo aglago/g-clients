@@ -3,11 +3,11 @@
 import { 
   LayoutDashboard, 
   BookOpen, 
-  Route, 
   FileText,
   ClipboardList,
   LogOut,
-  User
+  User,
+  GraduationCap
 } from "lucide-react";
 
 import { HiOutlineUserGroup } from "react-icons/hi2";
@@ -27,6 +27,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { Button } from "@/components/ui/button";
+import Logout from "./icons/logout";
 
 // Admin Dashboard Menu items
 const items = [
@@ -49,7 +50,7 @@ const items = [
   {
     title: "Tracks",
     url: "/dashboard/tracks",
-    icon: Route,
+    icon: GraduationCap,
   },
   {
     title: "Courses",
@@ -78,9 +79,9 @@ export function AppSidebar() {
   
   return (
     <Sidebar collapsible="icon">
-      <SidebarContent className="bg-primary rounded-r-[8px]">
+      <SidebarContent className="bg-primary rounded-r-[4px]">
         <SidebarHeader>
-          <div className="flex justify-center h-24 bg-white rounded-[8px] items-center">
+          <div className="flex justify-center h-24 mb-2 bg-white rounded-[4px] items-center">
             <Link href="/">
               <div className="inline-block">
                 <Image
@@ -94,7 +95,7 @@ export function AppSidebar() {
           </div>
         </SidebarHeader>
         
-        <div className="flex-1 px-3 py-4">
+        <div className="flex-1 px-2 py-4">
           <SidebarMenu className="flex flex-col gap-4">
             {items.map((item) => {
               const isActive = pathname === item.url;
@@ -104,11 +105,11 @@ export function AppSidebar() {
                     asChild 
                     tooltip={item.title} 
                     isActive={isActive}
-                    className="h-14 text-white hover:text-white hover:bg-white/10 data-[active=true]:text-primary data-[active=true]:bg-white [&>svg]:text-white hover:[&>svg]:text-white data-[active=true]:[&>svg]:text-primary"
+                    className="h-14 text-white hover:text-white hover:bg-white/10 data-[active=true]:text-primary data-[active=true]:bg-white [&>svg]:text-white hover:[&>svg]:text-white data-[active=true]:[&>svg]:text-primary [&>svg]:!w-6 [&>svg]:!h-6 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
                   >
-                    <Link href={item.url}>
+                    <Link href={item.url} className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:w-full">
                       <item.icon />
-                      <span className="font-inter text-body-md">{item.title}</span>
+                      <span className="font-inter text-body-md group-data-[collapsible=icon]:hidden">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -117,7 +118,8 @@ export function AppSidebar() {
           </SidebarMenu>
         </div>
         <SidebarFooter>
-          <div className="flex items-center justify-between p-4 bg-white/10 rounded-lg mx-3 mb-3">
+          {/* Expanded state footer */}
+          <div className="group-data-[collapsible=icon]:hidden flex items-center justify-between p-1 rounded-lg mx-3 mb-3">
             {/* Profile section */}
             <div className="flex items-center gap-3 min-w-0 flex-1">
               {/* Profile image */}
@@ -125,8 +127,8 @@ export function AppSidebar() {
                 <User className="w-5 h-5 text-white" />
               </div>
               
-              {/* Admin info - only show when expanded */}
-              <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
+              {/* Admin info */}
+              <div className="flex flex-col min-w-0">
                 <span className="text-white font-medium text-sm truncate">
                   {user ? `${user.firstName} ${user.lastName}` : 'Admin User'}
                 </span>
@@ -142,6 +144,25 @@ export function AppSidebar() {
               size="icon"
               onClick={handleLogout}
               className="flex-shrink-0 w-8 h-8 text-white hover:bg-white/20 hover:text-white"
+              title="Logout"
+            >
+              <Logout />
+            </Button>
+          </div>
+
+          {/* Collapsed state footer - stacked icons */}
+          <div className="hidden group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:mx-3 group-data-[collapsible=icon]:mb-3">
+            {/* Profile icon only */}
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-white" />
+            </div>
+            
+            {/* Logout button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="w-10 h-10 text-white hover:bg-white/20 hover:text-white"
               title="Logout"
             >
               <LogOut className="w-4 h-4" />
