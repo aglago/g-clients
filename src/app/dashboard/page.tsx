@@ -145,7 +145,7 @@ export default function DashboardPage() {
                       <p className="font-semibold">${invoice.amount.toLocaleString()}</p>
                       <p className={`text-sm ${
                         invoice.status === 'paid' ? 'text-green-600' : 
-                        invoice.status === 'pending' ? 'text-yellow-600' : 'text-red-600'
+                        invoice.status === 'unpaid' ? 'text-yellow-600' : 'text-red-600'
                       }`}>
                         {invoice.status}
                       </p>

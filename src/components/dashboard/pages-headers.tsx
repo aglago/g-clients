@@ -17,6 +17,7 @@ interface PagesHeadersProps<T> {
   addButtonText: string;
   onAddClick?: () => void;
   isLoading?: boolean;
+  showAddButton?: boolean;
 }
 
 export default function PagesHeaders<T>({
@@ -29,6 +30,7 @@ export default function PagesHeaders<T>({
   addButtonText,
   onAddClick,
   isLoading = false,
+  showAddButton = true,
 }: PagesHeadersProps<T>) {
   const searchRef = useRef<SearchRef>(null);
 
@@ -61,12 +63,14 @@ export default function PagesHeaders<T>({
             />
           </div>
 
-          <div className="flex">
-            <Button onClick={handleAddClick} disabled={isLoading}>
-              <Plus className="size-4 mr-2" />
-              {addButtonText}
-            </Button>
-          </div>
+          {showAddButton && (
+            <div className="flex">
+              <Button onClick={handleAddClick} disabled={isLoading}>
+                <Plus className="size-4 mr-2" />
+                {addButtonText}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </section>
