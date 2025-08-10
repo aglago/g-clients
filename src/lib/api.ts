@@ -272,6 +272,11 @@ export interface Learner {
   lastName: string;
   email: string;
   contact: string;
+  gender: 'male' | 'female' | 'other';
+  location: string;
+  bio: string;
+  trackId?: string; // Track the learner is enrolled in
+  amountPaid: number; // Total amount paid by learner
   createdAt: string;
   updatedAt: string;
 }
@@ -283,12 +288,21 @@ export interface CreateLearnerRequest {
   password: string;
   confirmPassword: string;
   contact: string;
+  gender: 'male' | 'female' | 'other';
+  location: string;
+  bio: string;
+  trackId?: string;
 }
 
 export interface UpdateLearnerRequest {
   firstName?: string;
   lastName?: string;
   contact?: string;
+  gender?: 'male' | 'female' | 'other';
+  location?: string;
+  bio?: string;
+  trackId?: string;
+  amountPaid?: number;
 }
 
 const learnersApi = {
@@ -410,7 +424,9 @@ export interface Invoice {
   courseId?: string;
   trackId?: string;
   amount: number;
-  status: 'pending' | 'paid' | 'cancelled';
+  status: 'paid' | 'unpaid' | 'cancelled';
+  dueDate: string;
+  paymentDetails: string;
   paymentDate?: string;
   createdAt: string;
   updatedAt: string;
@@ -418,13 +434,17 @@ export interface Invoice {
 
 export interface CreateInvoiceRequest {
   learnerId: string;
-  courseId?: string;
-  trackId?: string;
   amount: number;
+  dueDate: string;
+  paymentDetails: string;
+  status: 'paid' | 'unpaid' | 'cancelled';
 }
 
 export interface UpdateInvoiceRequest {
-  status?: 'pending' | 'paid' | 'cancelled';
+  amount?: number;
+  dueDate?: string;
+  paymentDetails?: string;
+  status?: 'paid' | 'unpaid' | 'cancelled';
   paymentDate?: string;
 }
 
