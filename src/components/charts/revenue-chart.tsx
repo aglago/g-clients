@@ -30,6 +30,7 @@ interface RevenueChartProps {
   invoices?: (Invoice | InvoiceWithLearner)[];
   title?: string;
   showTitle?: boolean;
+  headerActions?: React.ReactNode; // For custom header content like TimePeriodSelector
   
   // Variants
   variant?: ChartVariant;
@@ -50,6 +51,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
   invoices = [],
   title = 'Revenue Overview',
   showTitle = true,
+  headerActions,
   variant = 'lastMonths',
   period = 'monthly',
   lastMonths = 6,
@@ -152,14 +154,17 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
   };
 
   return (
-    <Card className="w-full shadow-none border-none p-0">
+    <Card className="w-full">
       {showTitle && (
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+        <CardHeader className={headerActions ? "flex flex-row items-center justify-between space-y-0 pb-2" : ""}>
+          <CardTitle className="font-semibold text-[20px] leading-[28px] font-figtree py-3.5 border-b-1">
+            {title}
+          </CardTitle>
+          {headerActions}
         </CardHeader>
       )}
-      <CardContent className="p-0">
-        <div style={{ height: `${height}px shadow-none` }}>
+      <CardContent>
+        <div style={{ height: `${height}px` }}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={chartData}
