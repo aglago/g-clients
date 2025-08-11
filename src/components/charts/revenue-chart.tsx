@@ -152,14 +152,14 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full shadow-none border-none p-0">
       {showTitle && (
         <CardHeader>
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         </CardHeader>
       )}
-      <CardContent className="p-0 shadow-none">
-        <div style={{ height: `${height}px` }}>
+      <CardContent className="p-0">
+        <div style={{ height: `${height}px shadow-none` }}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={chartData}
@@ -199,7 +199,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
                   strokeDasharray="8 8"
                   strokeWidth={1.5}
                   label={{ 
-                    value: "Average", 
+                    value: "Avg", 
                     position: "right",
                     fill: "#6B7280",
                     fontSize: 12
