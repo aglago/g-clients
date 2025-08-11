@@ -3,30 +3,24 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { 
-  invoicesApi, 
-  learnersApi, 
+import {
   tracksApi, 
   coursesApi,
-  queryKeys,
-  type ChartVariant 
+  queryKeys
 } from '@/lib/api';
 import { mockLearners, mockInvoices } from '@/lib/mockData';
-import { RevenueChart, TimePeriodSelector } from '@/components/charts';
+import { RevenueChart, TimePeriodSelector, type ChartVariant } from '@/components/charts';
 import { calculateDashboardMetrics } from '@/lib/dashboard-analytics';
 import PagesHeaders from '@/components/dashboard/pages-headers';
 import OverviewCard from '@/components/dashboard/overview-cards';
 import PeopleCommunity from '@/components/icons/people-community';
 import CurrencyDollar from '@/components/icons/currency-dollar';
-import Invoice from '@/components/icons/invoice';
 import { 
   DollarSign, 
   FileText, 
   BookOpen,
-  Download
 } from 'lucide-react';
 
 export default function ReportsPage() {
@@ -72,7 +66,7 @@ export default function ReportsPage() {
   };
 
   // Top performing tracks (mock calculation)
-  const topTracks = tracks.slice(0, 5).map((track, index) => ({
+  const topTracks = tracks.slice(0, 5).map((track) => ({
     ...track,
     enrollments: Math.floor(Math.random() * 100) + 20,
     revenue: Math.floor(Math.random() * 5000) + 1000,
