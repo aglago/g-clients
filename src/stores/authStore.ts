@@ -189,12 +189,9 @@ export const useAuthStore = create<AdminAuthState>()(
 
       updatePassword: async (currentPassword, newPassword, confirmPassword) => {
         try {
-          set({ isLoading: true });
           await authApi.updatePassword({ currentPassword, newPassword, confirmPassword });
-          set({ isLoading: false });
           toast.success('Password updated successfully!');
         } catch (error) {
-          set({ isLoading: false });
           toast.error(handleApiError(error));
           throw error;
         }
@@ -202,19 +199,16 @@ export const useAuthStore = create<AdminAuthState>()(
 
       updateProfile: async (firstName, lastName, contact, profileImage) => {
         try {
-          set({ isLoading: true });
           const response = await authApi.updateProfile({ firstName, lastName, contact, profileImage });
           
           // Update user data in store
           set((state) => ({ 
             ...state,
-            user: response.user || state.user,
-            isLoading: false 
+            user: response.user || state.user
           }));
           
           toast.success('Profile updated successfully!');
         } catch (error) {
-          set({ isLoading: false });
           toast.error(handleApiError(error));
           throw error;
         }

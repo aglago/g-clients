@@ -126,7 +126,7 @@ export default function DashboardPage() {
         {/* Latest Invoices */}
         <Card>
           <CardHeader>
-            <CardTitle>Latest Invoices</CardTitle>
+            <CardTitle className="font-semibold text-[20px] leading-[28px] font-figtree py-3.5 border-b-1">Latest Invoices</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
