@@ -434,6 +434,16 @@ export interface Invoice {
   updatedAt: string;
 }
 
+// Invoice with populated learner data for display
+export interface InvoiceWithLearner extends Omit<Invoice, 'learnerId'> {
+  learnerId: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    profileImage?: string;
+  };
+}
+
 export interface CreateInvoiceRequest {
   learnerId: string;
   amount: number;
@@ -452,13 +462,13 @@ export interface UpdateInvoiceRequest {
 
 const invoicesApi = {
   // GET /invoices - Get all invoices
-  getAllInvoices: async (): Promise<Invoice[]> => {
+  getAllInvoices: async (): Promise<InvoiceWithLearner[]> => {
     const response = await apiClient.get('/invoices');
     return response.data;
   },
 
   // GET /invoices/:id - Get invoice by ID
-  getInvoiceById: async (id: string): Promise<Invoice> => {
+  getInvoiceById: async (id: string): Promise<InvoiceWithLearner> => {
     const response = await apiClient.get(`/invoices/${id}`);
     return response.data;
   },

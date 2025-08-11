@@ -1,4 +1,4 @@
-import { Learner, Invoice } from './api';
+import { Learner, Invoice, InvoiceWithLearner } from './api';
 
 export interface PercentageChange {
   change: number;
@@ -51,7 +51,7 @@ export const calculateCountChange = <T extends { createdAt: string }>(
  * Calculate percentage change between current month and last month for revenue
  */
 export const calculateRevenueChange = (
-  invoices: Invoice[]
+  invoices: Invoice[] | InvoiceWithLearner[]
 ): PercentageChange | null => {
   const now = new Date();
   const currentMonth = now.getMonth();
@@ -119,7 +119,7 @@ const isMockData = (data: { createdAt: string }[]): boolean => {
  */
 export const calculateDashboardMetrics = (
   learners: Learner[],
-  invoices: Invoice[]
+  invoices: Invoice[] | InvoiceWithLearner[]
 ): DashboardMetrics => {
   const totalLearners = learners.length;
   const totalRevenue = invoices.reduce((sum, invoice) => sum + (invoice.amount || 0), 0);

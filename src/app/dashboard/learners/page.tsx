@@ -6,6 +6,7 @@ import PagesHeaders from '@/components/dashboard/pages-headers'
 import { Button } from '@/components/ui/button'
 import { Eye } from 'lucide-react'
 import { Learner, queryKeys, tracksApi, Track } from '@/lib/api'
+import { mockLearners } from '@/lib/mockData'
 import LearnerDetailsModal from '@/components/modals/learner-details-modal'
 import {
   Table,
@@ -24,79 +25,6 @@ import {
 } from '@tanstack/react-table'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-// Mock data for learners
-const mockLearners: Learner[] = [
-  {
-    id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    contact: '+1234567890',
-    gender: 'male',
-    location: 'New York, USA',
-    bio: 'Software engineer with 5 years of experience in React and Node.js',
-    trackId: '1',
-    amountPaid: 299.99,
-    createdAt: '2023-01-15T10:30:00Z',
-    updatedAt: '2023-01-15T10:30:00Z',
-  },
-  {
-    id: '2',
-    firstName: 'Jane',
-    lastName: 'Smith',
-    email: 'jane.smith@example.com',
-    contact: '+1987654321',
-    gender: 'female',
-    location: 'San Francisco, USA',
-    bio: 'UI/UX designer transitioning to frontend development',
-    trackId: '2',
-    amountPaid: 199.99,
-    createdAt: '2023-02-20T14:15:00Z',
-    updatedAt: '2023-02-20T14:15:00Z',
-  },
-  {
-    id: '3',
-    firstName: 'Mike',
-    lastName: 'Johnson',
-    email: 'mike.johnson@example.com',
-    contact: '+1122334455',
-    gender: 'male',
-    location: 'Chicago, USA',
-    bio: 'Recent computer science graduate looking to start career in tech',
-    trackId: '1',
-    amountPaid: 299.99,
-    createdAt: '2023-03-10T09:45:00Z',
-    updatedAt: '2023-03-10T09:45:00Z',
-  },
-  {
-    id: '4',
-    firstName: 'Sarah',
-    lastName: 'Williams',
-    email: 'sarah.williams@example.com',
-    contact: '+1555666777',
-    gender: 'female',
-    location: 'Austin, USA',
-    bio: 'Marketing professional learning to code to better understand digital products',
-    trackId: '3',
-    amountPaid: 399.99,
-    createdAt: '2023-04-05T16:20:00Z',
-    updatedAt: '2023-04-05T16:20:00Z',
-  },
-  {
-    id: '5',
-    firstName: 'Alex',
-    lastName: 'Brown',
-    email: 'alex.brown@example.com',
-    contact: '+1999888777',
-    gender: 'other',
-    location: 'Seattle, USA',
-    bio: 'Full-stack developer looking to upgrade skills with modern frameworks',
-    trackId: '2',
-    amountPaid: 199.99,
-    createdAt: '2023-05-12T11:10:00Z',
-    updatedAt: '2023-05-12T11:10:00Z',
-  },
-]
 
 // Helper function to map mock trackIds to real tracks
 const getMockTrackForLearner = (mockTrackId: string, realTracks: Track[]): Track | undefined => {
