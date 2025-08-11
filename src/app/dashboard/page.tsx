@@ -27,9 +27,19 @@ import { calculateDashboardMetrics } from "@/lib/dashboard-analytics";
 import PeopleCommunity from "@/components/icons/people-community";
 import CurrencyDollar from "@/components/icons/currency-dollar";
 import Invoice from "@/components/icons/invoice";
+import { RevenueChart, TimePeriodSelector } from "@/components/charts";
+import type { ChartVariant } from "@/components/charts";
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
+  const [selectedPeriod, setSelectedPeriod] = React.useState("6months");
+  const [chartConfig, setChartConfig] = React.useState<{
+    period: ChartVariant;
+    lastMonths?: number;
+  }>({
+    period: "lastMonths",
+    lastMonths: 6,
+  });
 
   // const { data: learners = [], isLoading: learnersLoading } = useQuery({
   //   queryKey: ["learners"],
@@ -149,7 +159,9 @@ export default function DashboardPage() {
           ) : tracks.length > 0 ? (
             tracks
               .slice(0, 4)
-              .map((track) => <Trackcard key={track.id} track={track} />)
+              .map((track) => (
+                <Trackcard key={track.id} track={track} minimal />
+              ))
           ) : (
             <div className="col-span-full text-center py-8">
               <p className="text-muted-foreground">No tracks available</p>
@@ -160,17 +172,30 @@ export default function DashboardPage() {
 
       {/* Revenue Chart and Latest Invoices */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Chart Placeholder */}
+        {/* Revenue Chart */}
         <Card>
-          <CardHeader>
-            <CardTitle>Revenue Overview</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="font-semibold text-[20px] leading-[28px] font-figtree py-3.5 border-b-1">
+              Recent Revenue
+            </CardTitle>
+            <TimePeriodSelector
+              selectedPeriod={selectedPeriod}
+              onPeriodChange={(period, config) => {
+                setSelectedPeriod(period);
+                setChartConfig(config);
+              }}
+              size="sm"
+            />
           </CardHeader>
           <CardContent>
-            <div className="h-64 bg-muted rounded-lg flex items-center justify-center">
-              <p className="text-muted-foreground">
-                Chart component will be rendered here
-              </p>
-            </div>
+            <RevenueChart
+              invoices={invoices}
+              variant={chartConfig.period}
+              lastMonths={chartConfig.lastMonths}
+              showTitle={false}
+              height={280}
+              barColor="#3B82F6"
+            />
           </CardContent>
         </Card>
 
@@ -192,7 +217,7 @@ export default function DashboardPage() {
                 </TableHeader>
                 <TableBody>
                   {invoicesLoading ? (
-                    Array.from({ length: 5 }).map((_, index) => (
+                    Array.from({ length: 4 }).map((_, index) => (
                       <TableRow key={index} className="!h-[76px]">
                         <TableCell className="px-6">
                           <div className="flex items-center gap-3">
@@ -206,7 +231,7 @@ export default function DashboardPage() {
                       </TableRow>
                     ))
                   ) : latestInvoices.length > 0 ? (
-                    latestInvoices.map((invoice, index) => (
+                    latestInvoices.slice(0, 3).map((invoice, index) => (
                       <TableRow
                         key={invoice.id}
                         className={`h-[76px] border-none ${
