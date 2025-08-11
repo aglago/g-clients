@@ -141,7 +141,7 @@ export const calculateDashboardMetrics = (
   } else {
     // Use real calculations for live data
     learnersChange = calculateCountChange(learners);
-    invoicesChange = calculateCountChange(invoices);
+    invoicesChange = calculateCountChange(invoices as { createdAt: string }[]);
     revenueChange = calculateRevenueChange(invoices);
   }
 
