@@ -158,7 +158,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         </CardHeader>
       )}
-      <CardContent>
+      <CardContent className="p-0 shadow-none">
         <div style={{ height: `${height}px` }}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
