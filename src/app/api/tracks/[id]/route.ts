@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { trackService } from '@/lib/services';
-import { requireAuth, requireAdmin } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { Types } from 'mongoose';
 import { deleteFromCloudinary } from '@/lib/cloudinary';
 import { getCloudinaryPublicId } from '@/lib/upload';
@@ -11,7 +11,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request);
+    // Allow public access to track details for learner pages
     const { id } = await params;
     
     const track = await trackService.getTrackById(id);
@@ -26,12 +26,6 @@ export async function GET(
     const transformedTrack = transformTrackDocument(track);
     return NextResponse.json(transformedTrack);
   } catch (error) {
-    if (error instanceof Error && error.message === 'Unauthorized') {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
     console.error('Get track error:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to fetch track' },

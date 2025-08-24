@@ -4,7 +4,14 @@ import { requireAuth } from '@/lib/auth';
 
 export async function PUT(request: NextRequest) {
   try {
-    const user = await requireAuth(request);
+    const authResult = await requireAuth(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { success: false, message: authResult.message },
+        { status: 401 }
+      );
+    }
+    const user = authResult.user!;
     const body = await request.json();
     const { firstName, lastName, contact, profileImage } = body;
     

@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     // Send welcome email
     try {
-      await emailService.sendWelcomeEmail(user.email, user.firstName);
+      await emailService.sendWelcomeEmail(user.email, user.firstName, user.role);
     } catch (emailError) {
       console.error('Failed to send welcome email:', emailError);
       // Don't fail verification if email fails

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     // Send password reset email
     try {
-      await emailService.sendPasswordResetEmail(user.email, resetToken, user.firstName);
+      await emailService.sendPasswordResetEmail(user.email, resetToken, user.firstName, user.role);
     } catch (emailError) {
       console.error('Failed to send password reset email:', emailError);
       return NextResponse.json(

@@ -4,7 +4,14 @@ import { requireAuth, verifyPassword } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth(request);
+    const authResult = await requireAuth(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { success: false, message: authResult.message },
+        { status: 401 }
+      );
+    }
+    const user = authResult.user!;
     const body = await request.json();
     const { currentPassword, newPassword, confirmPassword } = body;
     
@@ -29,7 +36,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!(await verifyPassword(currentPassword, user.password))) {
+    // Get full user record to access password
+    const fullUser = await userService.getUserById(user.id);
+    if (!fullUser) {
+      return NextResponse.json(
+        { success: false, message: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    if (!(await verifyPassword(currentPassword, fullUser.password))) {
       return NextResponse.json(
         { success: false, message: 'Current password is incorrect' },
         { status: 400 }

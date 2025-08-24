@@ -1,23 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { trackService } from '@/lib/services';
-import { requireAuth, requireAdmin } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { transformTrackDocuments, transformTrackDocument } from '@/lib/transformers';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    await requireAuth(request);
-    
+    // Allow public access to tracks for learner homepage
     const tracks = await trackService.getAllTracks();
     const transformedTracks = transformTrackDocuments(tracks);
     
     return NextResponse.json(transformedTracks);
   } catch (error) {
-    if (error instanceof Error && error.message === 'Unauthorized') {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
     console.error('Get tracks error:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to fetch tracks' },
