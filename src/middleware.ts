@@ -17,18 +17,18 @@ export function middleware(request: NextRequest) {
   }
 
   // If the user is not authenticated and tries to access protected routes
-  if (!isAuthenticated && request.nextUrl.pathname.startsWith('/dashboard')) {
-    const loginUrl = new URL('/auth/login', request.url);
+  if (!isAuthenticated && request.nextUrl.pathname.startsWith('/admin/dashboard')) {
+    const loginUrl = new URL('/admin/login', request.url);
     loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   // If the user is authenticated and tries to access auth routes
   if (isAuthenticated && (
-    request.nextUrl.pathname.startsWith('/auth/login') || 
-    request.nextUrl.pathname.startsWith('/auth/register')
+    request.nextUrl.pathname.startsWith('/admin/login') || 
+    request.nextUrl.pathname.startsWith('/admin/register')
   )) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
 
   return NextResponse.next();
@@ -36,5 +36,5 @@ export function middleware(request: NextRequest) {
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: ['/dashboard/:path*', '/auth/:path*'],
+  matcher: ['/admin/dashboard/:path*', '/admin/login', '/admin/register'],
 };

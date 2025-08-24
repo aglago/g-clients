@@ -21,6 +21,8 @@ interface AdminAuthState {
   updatePassword: (currentPassword: string, newPassword: string, confirmPassword: string) => Promise<void>;
   updateProfile: (firstName: string, lastName: string, contact?: string, profileImage?: string) => Promise<void>;
   logout: () => Promise<void>;
+  // Auto-login method for checkout flow
+  setAuthData: (user: AuthResponse['user'], token: string) => void;
 }
 
 // Helper function to handle API errors
@@ -108,7 +110,7 @@ export const useAuthStore = create<AdminAuthState>()(
             toast.success(errorData.message);
             
             // Redirect to verification page with email
-            window.location.href = `/auth/verify-email?email=${encodeURIComponent(errorData.email)}`;
+            window.location.href = `/admin/verify-email?email=${encodeURIComponent(errorData.email)}`;
             return;
           }
           
@@ -233,6 +235,23 @@ export const useAuthStore = create<AdminAuthState>()(
           set({ isLoading: false });
           toast.error(handleApiError(error));
         }
+      },
+
+      setAuthData: (user, token) => {
+        set({
+          user,
+          token,
+          isAuthenticated: true,
+          isLoading: false
+        });
+        
+        // Set cookie for middleware compatibility
+        document.cookie = `auth-storage=${JSON.stringify({
+          state: {
+            token,
+            isAuthenticated: true
+          }
+        })}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
       }
     }),
     {

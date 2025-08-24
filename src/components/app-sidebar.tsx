@@ -33,33 +33,33 @@ import Logout from "./icons/logout";
 const items = [
   {
     title: "Dashboard",
-    url: "/dashboard",
+    url: "/admin/dashboard",
     icon: LayoutDashboard,
   },
 
   {
     title: "Invoices",
-    url: "/dashboard/invoices",
+    url: "/admin/dashboard/invoices",
     icon: FileText,
   },
   {
     title: "Learners",
-    url: "/dashboard/learners",
+    url: "/admin/dashboard/learners",
     icon: HiOutlineUserGroup,
   },
   {
     title: "Tracks",
-    url: "/dashboard/tracks",
+    url: "/admin/dashboard/tracks",
     icon: GraduationCap,
   },
   {
     title: "Courses",
-    url: "/dashboard/courses",
+    url: "/admin/dashboard/courses",
     icon: BookOpen,
   },
   {
     title: "Reports",
-    url: "/dashboard/reports",
+    url: "/admin/dashboard/reports",
     icon: ClipboardList,
   }
 ];
@@ -71,7 +71,7 @@ export function AppSidebar() {
   const handleLogout = async () => {
     try {
       await logout();
-      window.location.href = '/auth/login';
+      window.location.href = '/admin/login';
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -121,7 +121,7 @@ export function AppSidebar() {
           {/* Expanded state footer */}
           <div className="group-data-[collapsible=icon]:hidden flex items-center justify-between p-1 rounded-lg mx-3 mb-3">
             {/* Profile section - clickable */}
-            <Link href="/dashboard/profile" className="flex items-center gap-3 min-w-0 flex-1 hover:bg-white/10 rounded-lg p-2 transition-colors">
+            <Link href="/admin/dashboard/profile" className="flex items-center gap-3 min-w-0 flex-1 hover:bg-white/10 rounded-lg p-2 transition-colors">
               {/* Profile image */}
               <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                 <User className="w-5 h-5 text-white" />
@@ -153,7 +153,7 @@ export function AppSidebar() {
           {/* Collapsed state footer - stacked icons */}
           <div className="hidden group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:mx-3 group-data-[collapsible=icon]:mb-3">
             {/* Profile icon only - clickable */}
-            <Link href="/dashboard/profile" className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+            <Link href="/admin/dashboard/profile" className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
               <User className="w-5 h-5 text-white" />
             </Link>
             

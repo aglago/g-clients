@@ -137,7 +137,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
           <p className="font-medium text-gray-900">{data.label}</p>
-          <p className="text-blue-600 font-semibold">
+          <p className="text-primary font-semibold">
             Revenue: ${payload[0].value.toLocaleString()}
           </p>
         </div>

@@ -10,18 +10,19 @@ interface GuestGuardProps {
 
 export default function GuestGuard({ children }: GuestGuardProps) {
   const router = useRouter()
-  const { isAuthenticated, token, isLoading } = useAuthStore()
+  const { isAuthenticated, token, user, isLoading } = useAuthStore()
 
   useEffect(() => {
     // Don't redirect while still loading the auth state
     if (isLoading) return
 
-    // If authenticated, redirect to dashboard
-    if (token && isAuthenticated) {
-      router.push('/dashboard')
-      return
+    // If authenticated, redirect based on role
+    if (token && isAuthenticated && user) {
+      const redirectPath = user.role === 'admin' ? '/admin/dashboard' : '/portal';
+      router.push(redirectPath);
+      return;
     }
-  }, [isAuthenticated, token, isLoading, router])
+  }, [isAuthenticated, token, isLoading, router, user])
 
   // Show loading spinner while checking authentication
   if (isLoading) {

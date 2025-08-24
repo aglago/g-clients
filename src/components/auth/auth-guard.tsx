@@ -26,8 +26,8 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       if (!token || !isAuthenticated) {
         console.log('AuthGuard - redirecting to login')
         // Only redirect if we're not already on an auth page
-        if (!window.location.pathname.startsWith('/auth/')) {
-          router.replace('/auth/login')
+        if (!window.location.pathname.startsWith('/admin/')) {
+          router.replace('/admin/login')
         }
         return
       }
