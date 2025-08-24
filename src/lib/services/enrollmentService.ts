@@ -21,8 +21,18 @@ export class EnrollmentService {
   async getTrackEnrollmentsByLearnerId(learnerId: string): Promise<ITrackEnrollment[]> {
     await connectMongoDB();
     return await TrackEnrollment.find({ learnerId })
-      .populate('trackId', 'name description')
+      .populate('trackId', 'name description slug')
       .sort({ createdAt: -1 });
+  }
+
+  async getEnrollmentByUserAndTrack(learnerId: string, trackId: string): Promise<ITrackEnrollment | null> {
+    await connectMongoDB();
+    return await TrackEnrollment.findOne({ 
+      learnerId, 
+      trackId 
+    })
+      .populate('trackId', 'name description')
+      .populate('learnerId', 'firstName lastName email');
   }
 
   async createTrackEnrollment(enrollmentData: {
@@ -53,6 +63,14 @@ export class EnrollmentService {
     await connectMongoDB();
     const result = await TrackEnrollment.findByIdAndDelete(id);
     return !!result;
+  }
+
+  async getTrackEnrollmentCount(trackId: string): Promise<number> {
+    await connectMongoDB();
+    return await TrackEnrollment.countDocuments({ 
+      trackId,
+      status: { $in: ['active', 'completed'] } // Exclude cancelled enrollments
+    });
   }
 
   // Course Registrations

@@ -7,6 +7,7 @@ export function transformTrackDocument(track: ITrack): Track {
   return {
     id: (track._id as unknown as string).toString(),
     name: track.name,
+    slug: track.slug && track.slug.trim() ? track.slug : createSlugFromName(track.name), // Fallback for existing tracks without slugs
     price: track.price,
     duration: track.duration,
     instructor: track.instructor,
@@ -24,6 +25,17 @@ export function transformTrackDocument(track: ITrack): Track {
     createdAt: track.createdAt.toISOString(),
     updatedAt: track.updatedAt.toISOString(),
   };
+}
+
+// Helper function to create slug from name (for fallback)
+function createSlugFromName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9 -]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .trim()
+    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
 }
 
 // Transform array of MongoDB Track documents

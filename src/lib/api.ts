@@ -46,7 +46,7 @@ apiClient.interceptors.response.use(
       
       // Reload the page to trigger auth guard
       if (typeof window !== 'undefined') {
-        window.location.href = '/auth/login';
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);
@@ -345,6 +345,7 @@ const learnersApi = {
 export interface Track {
   id: string;
   name: string;
+  slug: string;
   price: number;
   duration: number;
   instructor: string;
@@ -353,6 +354,7 @@ export interface Track {
   courses?: string[]; // Array of course IDs
   rating?: number;
   reviewsCount?: number;
+  enrolledCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -395,6 +397,12 @@ const tracksApi = {
   // GET /tracks/:id - Get track by ID
   getTrackById: async (id: string): Promise<Track> => {
     const response = await apiClient.get(`/tracks/${id}`);
+    return response.data;
+  },
+
+  // GET /tracks/by-slug/:slug - Get track by slug
+  getTrackBySlug: async (slug: string): Promise<Track> => {
+    const response = await apiClient.get(`/tracks/by-slug/${slug}`);
     return response.data;
   },
 
@@ -646,6 +654,43 @@ export const queryKeys = {
   },
 };
 
+// =========================
+// PUBLIC STATS ENDPOINT
+// =========================
+
+export interface PublicStats {
+  coursesCount: number;
+  studentsCount: number;
+  tracksCount: number;
+  hoursOfContent: number;
+}
+
+const publicApi = {
+  // GET /public/stats - Get public statistics
+  getStats: async (): Promise<PublicStats> => {
+    const response = await apiClient.get('/public/stats');
+    return response.data;
+  },
+};
+
+// =========================
+// USER-SPECIFIC ENDPOINTS
+// =========================
+
+const userApi = {
+  // GET /enrollments - Get current user's enrollments
+  getUserEnrollments: async () => {
+    const response = await apiClient.get('/enrollments');
+    return response.data.data;
+  },
+
+  // GET /invoices/user - Get current user's invoices
+  getUserInvoices: async () => {
+    const response = await apiClient.get('/invoices/user');
+    return response.data.data;
+  },
+};
+
 // Export all API modules
 export {
   authApi,
@@ -655,4 +700,6 @@ export {
   invoicesApi,
   trackEnrollmentsApi,
   courseRegistrationsApi,
+  publicApi,
+  userApi,
 };

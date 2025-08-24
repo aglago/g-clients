@@ -1,5 +1,6 @@
 import connectMongoDB from '../mongodb';
 import { Track, type ITrack } from '../models';
+import { enrollmentService } from './enrollmentService';
 
 export class TrackService {
   async getAllTracks(): Promise<ITrack[]> {
@@ -10,6 +11,47 @@ export class TrackService {
   async getTrackById(id: string): Promise<ITrack | null> {
     await connectMongoDB();
     return await Track.findById(id).populate('courses');
+  }
+
+  async getTrackBySlug(slug: string): Promise<ITrack | null> {
+    await connectMongoDB();
+    
+    // First try to find by existing slug field
+    let track = await Track.findOne({ slug }).populate('courses');
+    
+    if (!track) {
+      // Fallback: find all tracks and match by generated slug
+      const allTracks = await Track.find().populate('courses');
+      track = allTracks.find(t => {
+        const generatedSlug = this.createSlug(t.name);
+        return generatedSlug === slug;
+      }) || null;
+    }
+    
+    return track;
+  }
+
+  async getTrackBySlugWithEnrollmentCount(slug: string): Promise<(ITrack & { enrolledCount: number }) | null> {
+    const track = await this.getTrackBySlug(slug);
+    if (!track) return null;
+    
+    const enrolledCount = await enrollmentService.getTrackEnrollmentCount((track as { _id: { toString(): string } })._id.toString());
+    
+    return {
+      ...track.toObject(),
+      enrolledCount
+    };
+  }
+
+  // Helper method to create slug (same as in Track model)
+  private createSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9 -]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim()
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
   }
 
   async createTrack(trackData: {

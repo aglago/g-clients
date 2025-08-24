@@ -13,6 +13,10 @@ export interface IUser extends Document {
   verificationOTPExpiry?: Date;
   resetToken?: string;
   resetTokenExpiry?: Date;
+  // Additional learner fields
+  gender?: 'male' | 'female' | 'other';
+  location?: string;
+  bio?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,6 +34,10 @@ const UserSchema = new Schema<IUser>({
   verificationOTPExpiry: { type: Date },
   resetToken: { type: String },
   resetTokenExpiry: { type: Date },
+  // Additional learner fields
+  gender: { type: String, enum: ['male', 'female', 'other'] },
+  location: { type: String },
+  bio: { type: String },
 }, {
   timestamps: true,
 });

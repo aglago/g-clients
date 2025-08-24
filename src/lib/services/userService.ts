@@ -39,6 +39,9 @@ export class UserService {
     isVerified?: boolean;
     verificationOTP?: string;
     verificationOTPExpiry?: Date;
+    gender?: 'male' | 'female' | 'other';
+    location?: string;
+    bio?: string;
   }): Promise<IUser> {
     await connectMongoDB();
     
