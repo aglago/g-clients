@@ -28,8 +28,8 @@ export default function Login() {
       const { email, password } = formData;
       await login(email, password);
 
-      // Redirect to dashboard if login is successful
-      router.push("/dashboard");
+      // Redirect to admin dashboard if login is successful
+      router.push("/admin/dashboard");
     } catch (error) {
       // Error is handled by the store
       console.error("Login error:", error);
@@ -81,7 +81,7 @@ export default function Login() {
 
           <div className="text-sm">
             <Link
-              href="/auth/forgot-password"
+              href="/admin/forgot-password"
               className="text-body-md-link text-primary/70"
             >
               Forgot your password?
@@ -98,7 +98,7 @@ export default function Login() {
           Don&apos;t have an account?{" "}
           <span>
             <Link
-              href="/auth/register"
+              href="/admin/register"
               className="text-body-md-link text-primary/70"
             >
               Register

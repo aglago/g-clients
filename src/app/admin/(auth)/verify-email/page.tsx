@@ -20,9 +20,9 @@ function VerifyEmailForm() {
     try {
       await verifyEmail(verificationOTP);
       
-      // Redirect to dashboard after successful verification and auto-login
+      // Redirect to admin dashboard after successful verification and auto-login
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/admin/dashboard');
       }, 2000);
     } catch (error) {
       // Error is handled by the store

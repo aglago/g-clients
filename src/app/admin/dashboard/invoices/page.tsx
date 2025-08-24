@@ -16,7 +16,6 @@ import {
   // Learner,
   InvoiceWithLearner,
 } from "@/lib/api";
-import { mockLearners, mockInvoices } from "@/lib/mockData";
 import Edit from "@/components/icons/edit";
 import Trash from "@/components/icons/trash";
 import { Badge } from "@/components/ui/badge";
@@ -43,20 +42,13 @@ export default function InvoicesPage() {
     useState<InvoiceWithLearner | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  // Use mock data with populated learner information
   const {
     data: invoices = [],
     isLoading,
     error,
   } = useQuery({
     queryKey: [queryKeys.invoices.all],
-    queryFn: () => Promise.resolve(mockInvoices), // Replace with invoicesApi.getAllInvoices when backend is ready
-  });
-
-  // const { data: learners = [] } = useQuery({
-  const {} = useQuery({
-    queryKey: [queryKeys.learners.all],
-    queryFn: () => Promise.resolve(mockLearners), // Replace with learnersApi.getAllLearners when backend is ready
+    queryFn: invoicesApi.getAllInvoices,
   });
 
   const [filteredInvoices, setFilteredInvoices] = useState<
@@ -64,7 +56,7 @@ export default function InvoicesPage() {
   >([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 5,
   });
 
   // Initialize filtered invoices with all invoices when data is loaded

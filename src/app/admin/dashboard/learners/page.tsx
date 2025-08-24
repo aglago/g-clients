@@ -5,8 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import PagesHeaders from '@/components/dashboard/pages-headers'
 import { Button } from '@/components/ui/button'
 import { Eye } from 'lucide-react'
-import { Learner, queryKeys, tracksApi, Track } from '@/lib/api'
-import { mockLearners } from '@/lib/mockData'
+import { Learner, queryKeys, tracksApi, learnersApi, Track } from '@/lib/api'
 import LearnerDetailsModal from '@/components/modals/learner-details-modal'
 import {
   Table,
@@ -26,24 +25,15 @@ import {
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 
-// Helper function to map mock trackIds to real tracks
-const getMockTrackForLearner = (mockTrackId: string, realTracks: Track[]): Track | undefined => {
-  if (!realTracks.length) return undefined
-  
-  // Map mock trackIds to real tracks by index
-  const trackIndex = parseInt(mockTrackId) - 1 // '1' -> 0, '2' -> 1, '3' -> 2
-  return realTracks[trackIndex] || realTracks[0] // fallback to first track
-}
 
 export default function 
 Page() {
   const [selectedLearner, setSelectedLearner] = useState<Learner | null>(null)
   const [showDetailsModal, setShowDetailsModal] = useState(false)
   
-  // For now, we'll use mock data, but this would normally fetch from API
   const { data: learners = [], isLoading, error } = useQuery({
     queryKey: [queryKeys.learners.all],
-    queryFn: () => Promise.resolve(mockLearners), // Replace with learnersApi.getAllLearners when backend is ready
+    queryFn: learnersApi.getAllLearners,
   })
 
   // Fetch tracks for display
@@ -72,8 +62,7 @@ Page() {
 
   // Function to extract searchable text from learner items
   const getLearnerSearchableText = (learner: Learner): string[] => {
-    // const track = tracks.find((t: Track) => t.id === learner.trackId)
-    const track = getMockTrackForLearner(learner.trackId || '', tracks)
+    const track = tracks.find((t: Track) => t.id === learner.trackId)
     return [
       learner.firstName || '',
       learner.lastName || '',
@@ -332,7 +321,7 @@ Page() {
           learner={selectedLearner}
           isOpen={showDetailsModal}
           onClose={handleCloseModal}
-          track={selectedLearner?.trackId ? getMockTrackForLearner(selectedLearner.trackId, tracks) : undefined}
+          track={selectedLearner?.trackId ? tracks.find(t => t.id === selectedLearner.trackId) : undefined}
         />
       )}
 

@@ -3,13 +3,12 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  // invoicesApi,
-  // learnersApi,
+  invoicesApi,
+  learnersApi,
   tracksApi,
   queryKeys,
   InvoiceWithLearner,
 } from "@/lib/api";
-import { mockLearners, mockInvoices } from "@/lib/mockData";
 import OverviewCard from "@/components/dashboard/overview-cards";
 import Trackcard from "@/components/dashboard/track-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,25 +40,14 @@ export default function DashboardPage() {
     lastMonths: 6,
   });
 
-  // const { data: learners = [], isLoading: learnersLoading } = useQuery({
-  //   queryKey: ["learners"],
-  //   queryFn: learnersApi.getAllLearners,
-  // });
-
-  // const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
-  //   queryKey: ["invoices"],
-  //   queryFn: invoicesApi.getAllInvoices,
-  // });
-
-  // Use mock data for now until backend is fully implemented
   const { data: learners = [], isLoading: learnersLoading } = useQuery({
-    queryKey: ["learners"],
-    queryFn: () => Promise.resolve(mockLearners),
+    queryKey: [queryKeys.learners.all],
+    queryFn: learnersApi.getAllLearners,
   });
 
   const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
-    queryKey: ["invoices"],
-    queryFn: () => Promise.resolve(mockInvoices),
+    queryKey: [queryKeys.invoices.all],
+    queryFn: invoicesApi.getAllInvoices,
   });
 
   const { data: tracks = [], isLoading: tracksLoading } = useQuery({

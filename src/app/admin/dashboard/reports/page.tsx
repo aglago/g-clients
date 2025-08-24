@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import {
   tracksApi, 
   coursesApi,
+  learnersApi,
+  invoicesApi,
   queryKeys
 } from '@/lib/api';
-import { mockLearners, mockInvoices } from '@/lib/mockData';
 import { RevenueChart, TimePeriodSelector, type ChartVariant } from '@/components/charts';
 import { calculateDashboardMetrics } from '@/lib/dashboard-analytics';
 import PagesHeaders from '@/components/dashboard/pages-headers';
@@ -34,15 +35,17 @@ export default function ReportsPage() {
     lastMonths: 6 
   });
 
-  // Fetch data using React Query with mock data
+  // State for top tracks sorting
+  const [tracksSortBy, setTracksSortBy] = useState<'revenue' | 'enrollments' | 'completion'>('revenue');
+
   const { data: learners = [], isLoading: learnersLoading } = useQuery({
-    queryKey: ['learners'],
-    queryFn: () => Promise.resolve(mockLearners),
+    queryKey: [queryKeys.learners.all],
+    queryFn: learnersApi.getAllLearners,
   });
 
   const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
-    queryKey: ['invoices'],
-    queryFn: () => Promise.resolve(mockInvoices),
+    queryKey: [queryKeys.invoices.all],
+    queryFn: invoicesApi.getAllInvoices,
   });
 
   const { data: tracks = [], isLoading: tracksLoading } = useQuery({
@@ -65,13 +68,42 @@ export default function ReportsPage() {
     cancelled: invoices.filter(inv => inv.status === 'cancelled').reduce((sum, inv) => sum + inv.amount, 0),
   };
 
-  // Top performing tracks (mock calculation)
-  const topTracks = tracks.slice(0, 5).map((track) => ({
-    ...track,
-    enrollments: Math.floor(Math.random() * 100) + 20,
-    revenue: Math.floor(Math.random() * 5000) + 1000,
-    completion: Math.floor(Math.random() * 40) + 60,
-  }));
+  // Top performing tracks - calculated from real data
+  const topTracks = tracks.map((track) => {
+    // Calculate enrollments for this track
+    const trackLearners = learners.filter(learner => learner.trackId === track.id);
+    const enrollments = trackLearners.length;
+    
+    // Calculate revenue from invoices for learners in this track
+    const trackRevenue = invoices.filter(invoice => 
+      invoice.learnerId && trackLearners.some(learner => 
+        learner.email === invoice.learnerId.email
+      )
+    ).reduce((sum, invoice) => sum + (invoice.status === 'paid' ? invoice.amount : 0), 0);
+    
+    // Mock completion rate for now (would need progress tracking data)
+    // In a real system, this would come from enrollment/progress data
+    const completion = enrollments > 0 ? Math.min(Math.max(60 + (enrollments * 2), 65), 95) : 0;
+    
+    return {
+      ...track,
+      enrollments,
+      revenue: trackRevenue,
+      completion,
+    };
+  }).sort((a, b) => {
+    // Dynamic sorting based on selected criteria
+    switch (tracksSortBy) {
+      case 'revenue':
+        return b.revenue - a.revenue;
+      case 'enrollments':
+        return b.enrollments - a.enrollments;
+      case 'completion':
+        return b.completion - a.completion;
+      default:
+        return b.revenue - a.revenue;
+    }
+  }).slice(0, 5); // Take top 5
 
   const handleExportReport = () => {
     // Mock export functionality
@@ -225,7 +257,7 @@ export default function ReportsPage() {
           <CardTitle className="font-semibold text-[20px] leading-[28px] font-figtree py-3.5 border-b-1">
             Top Performing Tracks
           </CardTitle>
-          <Select defaultValue="revenue">
+          <Select value={tracksSortBy} onValueChange={(value: 'revenue' | 'enrollments' | 'completion') => setTracksSortBy(value)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
