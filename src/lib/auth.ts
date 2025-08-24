@@ -66,18 +66,35 @@ export async function getUserFromRequest(request: NextRequest) {
   return await User.findById(payload.userId);
 }
 
-export async function requireAuth(request: NextRequest) {
-  const user = await getUserFromRequest(request);
-  if (!user) {
-    throw new Error('Unauthorized');
-  }
-  return user;
+interface AuthResult {
+  success: boolean;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
+    contact?: string;
+    profileImage?: string;
+  };
+  message?: string;
 }
 
-export async function requireAdmin(request: NextRequest) {
-  const user = await requireAuth(request);
-  if (user.role !== 'admin') {
-    throw new Error('Forbidden: Admin access required');
+export async function requireAuth(request: NextRequest): Promise<AuthResult> {
+  const user = await getUserFromRequest(request);
+  if (!user) {
+    return { success: false, message: 'Unauthorized' };
   }
-  return user;
+  return { success: true, user };
+}
+
+export async function requireAdmin(request: NextRequest): Promise<AuthResult> {
+  const authResult = await requireAuth(request);
+  if (!authResult.success) {
+    return authResult;
+  }
+  if (!authResult.user || authResult.user.role !== 'admin') {
+    return { success: false, message: 'Forbidden: Admin access required' };
+  }
+  return authResult;
 }

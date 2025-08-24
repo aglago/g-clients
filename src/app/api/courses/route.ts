@@ -1,24 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { courseService, trackService } from '@/lib/services';
-import { requireAuth, requireAdmin } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { transformCourseDocuments, transformCourseDocument } from '@/lib/transformers';
 import { Types } from 'mongoose';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    await requireAuth(request);
-    
+    // Allow public access to courses for learner homepage
     const courses = await courseService.getAllCourses();
     const transformedCourses = transformCourseDocuments(courses);
     
     return NextResponse.json(transformedCourses);
   } catch (error) {
-    if (error instanceof Error && error.message === 'Unauthorized') {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
     console.error('Get courses error:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to fetch courses' },
@@ -29,7 +22,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin(request);
+    const authResult = await requireAdmin(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { success: false, message: authResult.message },
+        { status: authResult.message === 'Unauthorized' ? 401 : 403 }
+      );
+    }
     
     const body = await request.json();
     const { title, track, picture, description } = body;
@@ -59,12 +58,6 @@ export async function POST(request: NextRequest) {
     const transformedCourse = transformCourseDocument(course);
     return NextResponse.json(transformedCourse, { status: 201 });
   } catch (error) {
-    if (error instanceof Error && (error.message === 'Unauthorized' || error.message === 'Forbidden: Admin access required')) {
-      return NextResponse.json(
-        { success: false, message: error.message },
-        { status: error.message === 'Unauthorized' ? 401 : 403 }
-      );
-    }
     console.error('Create course error:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to create course' },
