@@ -11,6 +11,7 @@
   --font-figtree: var(--font-figtree);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-gray-background: var(--gray-background);
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -51,9 +52,12 @@
   --primary: oklch(45.37% 0.128 250.17);
   --foreground: oklch(25.13% 0.043 282.85);
   --muted-foreground: oklch(59.56% 0.008 295.34);
-  --overview-heading: oklch(30.88% 0.050 286.36);
+  --overview-heading: oklch(30.88% 0.05 286.36);
   --success: oklch(97.88% 0.022 160.24);
-  --success-foreground: oklch(51.00% 0.122 156.56);
+  --success-foreground: oklch(51% 0.122 156.56);
+  --gray-background: oklch(97.02% 0.000 0);
+
+  --surface-action: #01589A;
 
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -260,5 +264,15 @@
     font-size: 20px;
     line-height: 24px;
     font-weight: 700;
+  }
+
+  /* globals.css */
+
+  .herobg-surface-action-gradient {
+    background: linear-gradient(
+        268.29deg,
+        rgba(1, 88, 154, 0) 0.85%,
+        rgba(1, 88, 154, 0.4) 61%
+      );
   }
 }

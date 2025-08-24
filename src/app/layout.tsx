@@ -6,8 +6,8 @@ import { fig, inter } from '@/components/ui/fonts';
 
 
 export const metadata: Metadata = {
-  title: 'G-Clients Admin',
-  description: 'Admin panel for G-Clients',
+  title: 'G-Clients',
+  description: 'Learn new skills with expert-led courses',
 };
 
 export default function RootLayout({

@@ -83,36 +83,6 @@ export const calculateRevenueChange = (
   };
 };
 
-/**
- * Generate mock percentage changes for demo purposes
- */
-const generateMockChanges = (): {
-  learnersChange: PercentageChange;
-  revenueChange: PercentageChange;
-  invoicesChange: PercentageChange;
-} => ({
-  learnersChange: {
-    change: 12,
-    isPositive: true
-  },
-  revenueChange: {
-    change: 8,
-    isPositive: true
-  },
-  invoicesChange: {
-    change: 5,
-    isPositive: false
-  }
-});
-
-/**
- * Check if data is using mock/old dates (before current year)
- */
-const isMockData = (data: { createdAt: string }[]): boolean => {
-  if (data.length === 0) return true;
-  const currentYear = new Date().getFullYear();
-  return data.some(item => new Date(item.createdAt).getFullYear() < currentYear);
-};
 
 /**
  * Calculate all dashboard metrics with percentage changes
@@ -125,25 +95,10 @@ export const calculateDashboardMetrics = (
   const totalRevenue = invoices.reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
   const totalInvoices = invoices.length;
 
-  // Check if we're using mock data (old dates)
-  const usingMockData = isMockData([...learners, ...invoices]);
-
-  let learnersChange: PercentageChange | null;
-  let invoicesChange: PercentageChange | null;
-  let revenueChange: PercentageChange | null;
-
-  if (usingMockData) {
-    // Use mock changes for demo purposes
-    const mockChanges = generateMockChanges();
-    learnersChange = mockChanges.learnersChange;
-    invoicesChange = mockChanges.invoicesChange;
-    revenueChange = mockChanges.revenueChange;
-  } else {
-    // Use real calculations for live data
-    learnersChange = calculateCountChange(learners);
-    invoicesChange = calculateCountChange(invoices as { createdAt: string }[]);
-    revenueChange = calculateRevenueChange(invoices);
-  }
+  // Always use real calculations
+  const learnersChange = calculateCountChange(learners);
+  const invoicesChange = calculateCountChange(invoices as { createdAt: string }[]);
+  const revenueChange = calculateRevenueChange(invoices);
 
   return {
     totalLearners,

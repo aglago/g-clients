@@ -83,8 +83,9 @@ class EmailService {
     });
   }
 
-  async sendPasswordResetEmail(email: string, token: string, firstName: string): Promise<void> {
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password?token=${token}`;
+  async sendPasswordResetEmail(email: string, token: string, firstName: string, role: 'admin' | 'learner' = 'learner'): Promise<void> {
+    const resetPath = role === 'admin' ? '/admin/reset-password' : '/reset-password';
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}${resetPath}?token=${token}`;
     
     const html = `
       <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
@@ -130,8 +131,9 @@ class EmailService {
     });
   }
 
-  async sendWelcomeEmail(email: string, firstName: string): Promise<void> {
-    const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/login`;
+  async sendWelcomeEmail(email: string, firstName: string, role: 'admin' | 'learner' = 'learner'): Promise<void> {
+    const loginPath = role === 'admin' ? '/admin/login' : '/login';
+    const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}${loginPath}`;
     
     const html = `
       <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
@@ -187,3 +189,8 @@ class EmailService {
 }
 
 export const emailService = new EmailService();
+
+// Export standalone sendEmail function for convenience
+export const sendEmail = async (options: EmailOptions): Promise<void> => {
+  return emailService.sendEmail(options);
+};
