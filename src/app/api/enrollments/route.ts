@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { requireLearner } from '@/lib/auth';
 import { enrollmentService } from '@/lib/services';
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await requireAuth(request);
+    const authResult = await requireLearner(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.message },
-        { status: 401 }
+        { status: authResult.user ? 403 : 401 }
       );
     }
 

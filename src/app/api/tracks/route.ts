@@ -21,7 +21,13 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin(request);
+    const authResult = await requireAdmin(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { success: false, message: authResult.message },
+        { status: authResult.message === 'Unauthorized' ? 401 : 403 }
+      );
+    }
     
     const body = await request.json();
     const { name, price, duration, instructor, picture, description, courses } = body;
@@ -53,12 +59,6 @@ export async function POST(request: NextRequest) {
     const transformedTrack = transformTrackDocument(track);
     return NextResponse.json(transformedTrack, { status: 201 });
   } catch (error) {
-    if (error instanceof Error && (error.message === 'Unauthorized' || error.message === 'Forbidden: Admin access required')) {
-      return NextResponse.json(
-        { success: false, message: error.message },
-        { status: error.message === 'Unauthorized' ? 401 : 403 }
-      );
-    }
     console.error('Create track error:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to create track' },

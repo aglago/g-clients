@@ -52,7 +52,7 @@ export default function LearnerTracksPage() {
     }) : [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <LearnerHeader currentPage="tracks" />
       
       {/* Hero Section */}
@@ -108,7 +108,7 @@ export default function LearnerTracksPage() {
       </section>
 
       {/* Tracks Grid */}
-      <section className="py-12">
+      <section className="py-12 flex-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">

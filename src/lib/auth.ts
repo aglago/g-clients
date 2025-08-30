@@ -98,3 +98,25 @@ export async function requireAdmin(request: NextRequest): Promise<AuthResult> {
   }
   return authResult;
 }
+
+export async function requireLearner(request: NextRequest): Promise<AuthResult> {
+  const authResult = await requireAuth(request);
+  if (!authResult.success) {
+    return authResult;
+  }
+  if (!authResult.user || authResult.user.role !== 'learner') {
+    return { success: false, message: 'Forbidden: Learner access required' };
+  }
+  return authResult;
+}
+
+export async function requireRole(request: NextRequest, role: string): Promise<AuthResult> {
+  const authResult = await requireAuth(request);
+  if (!authResult.success) {
+    return authResult;
+  }
+  if (!authResult.user || authResult.user.role !== role) {
+    return { success: false, message: `Forbidden: ${role} access required` };
+  }
+  return authResult;
+}

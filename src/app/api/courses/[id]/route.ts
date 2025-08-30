@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { courseService, trackService } from '@/lib/services';
-import { requireAuth, requireAdmin } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { transformCourseDocument } from '@/lib/transformers';
 import { Types } from 'mongoose';
 import { deleteFromCloudinary } from '@/lib/cloudinary';
@@ -11,7 +11,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request);
+    const authResult = await requireAdmin(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { success: false, message: authResult.message },
+        { status: authResult.message === 'Unauthorized' ? 401 : 403 }
+      );
+    }
+    
     const { id } = await params;
     
     const course = await courseService.getCourseById(id);
@@ -26,12 +33,6 @@ export async function GET(
     const transformedCourse = transformCourseDocument(course);
     return NextResponse.json(transformedCourse);
   } catch (error) {
-    if (error instanceof Error && error.message === 'Unauthorized') {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
     console.error('Get course error:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to fetch course' },

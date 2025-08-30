@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { enrollmentService } from '@/lib/services';
-import { requireAuth, requireAdmin } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request);
+    const authResult = await requireAdmin(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { success: false, message: authResult.message },
+        { status: authResult.message === 'Unauthorized' ? 401 : 403 }
+      );
+    }
+    
     const { id } = await params;
     
     const registration = await enrollmentService.getCourseRegistrationById(id);
@@ -21,12 +28,6 @@ export async function GET(
     
     return NextResponse.json(registration);
   } catch (error) {
-    if (error instanceof Error && error.message === 'Unauthorized') {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
     console.error('Get course registration error:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to fetch course registration' },

@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadToCloudinary } from '@/lib/cloudinary';
-import { requireAuth } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    // Ensure user is authenticated
-    await requireAuth(request);
+    // Ensure user is admin for file uploads
+    const authResult = await requireAdmin(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { success: false, message: authResult.message },
+        { status: authResult.message === 'Unauthorized' ? 401 : 403 }
+      );
+    }
 
     const data = await request.formData();
     const file = data.get('file') as File;
@@ -52,13 +58,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    if (error instanceof Error && error.message === 'Unauthorized') {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     console.error('Upload error:', error);
     return NextResponse.json(
       { success: false, message: 'Upload failed' },

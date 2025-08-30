@@ -78,10 +78,10 @@ export default function DashboardPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 font-figtree">
-        <h2 className="font-semibold text-2xl text-foreground">
-          Welcome {user?.firstName || "Admin"} 👋
+        {/* Header */}
+        <div className="flex flex-col gap-4 font-figtree">
+          <h2 className="font-semibold text-2xl text-foreground">
+            Welcome {user?.firstName || "Admin"} 👋
         </h2>
         <p className="text-[18px] text-muted-foreground">
           Track activity, trends, and popular destinations in real time

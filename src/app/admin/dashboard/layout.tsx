@@ -3,7 +3,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import AuthGuard from "@/components/auth/auth-guard";
+import AdminGuard from "@/components/auth/admin-guard";
 
 export default function DashboardLayout({
   children,
@@ -11,7 +11,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard>
+    <AdminGuard>
       <SidebarProvider>
         <AppSidebar />
           <div className="px-8 w-full">
@@ -21,6 +21,6 @@ export default function DashboardLayout({
             <div className="flex flex-col gap-4">{children}</div>
           </div>
       </SidebarProvider>
-    </AuthGuard>
+    </AdminGuard>
   );
 }
