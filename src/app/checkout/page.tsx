@@ -94,13 +94,16 @@ function CheckoutPageContent() {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.email || "",
+        phone: user.contact || "",
+        gender: user.gender || "",
+        location: user.location || "",
         // Skip password fields for authenticated users
         password: "",
         confirmPassword: "",
       }));
       
       // Show a toast that they're logged in
-      toast.success(`Welcome back, ${user.firstName}! Your information has been prefilled.`);
+      toast.success(`Your information has been prefilled.`);
     }
   }, [trackSlug, router, isAuthenticated, user]);
 
@@ -244,6 +247,8 @@ function CheckoutPageContent() {
           trackSlug: trackSlug!,
           paymentSuccess: paymentResult.success,
           paymentDetails: paymentResult.details,
+          gender: formData.gender,
+          location: formData.location,
         };
 
         response = await fetch("/api/checkout/authenticated", {
@@ -359,15 +364,158 @@ function CheckoutPageContent() {
     return (
       <div className="min-h-screen bg-gray-50">
         <LearnerHeader />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/3 mb-8"></div>
-            <div className="grid lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <div className="h-96 bg-gray-200 rounded-lg"></div>
+            {/* Breadcrumb skeleton */}
+            <div className="mb-8">
+              <div className="flex items-center space-x-2">
+                <div className="h-4 bg-gray-200 rounded w-12"></div>
+                <div className="h-4 bg-gray-200 rounded w-1"></div>
+                <div className="h-4 bg-gray-200 rounded w-16"></div>
+                <div className="h-4 bg-gray-200 rounded w-1"></div>
+                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                <div className="h-4 bg-gray-200 rounded w-1"></div>
+                <div className="h-4 bg-gray-200 rounded w-20"></div>
               </div>
-              <div>
-                <div className="h-64 bg-gray-200 rounded-lg"></div>
+            </div>
+
+            {/* Progress indicator skeleton */}
+            <div className="mb-12">
+              <div className="flex items-center justify-center space-x-8">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                  <div className="ml-3 h-5 bg-gray-200 rounded w-32"></div>
+                </div>
+                <div className="w-24 h-1 bg-gray-200 rounded"></div>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                  <div className="ml-3 h-5 bg-gray-200 rounded w-20"></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Main form skeleton */}
+              <div className="lg:col-span-2">
+                <div className="bg-white border rounded-lg shadow-sm">
+                  {/* Card header */}
+                  <div className="p-6 border-b">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 bg-gray-200 rounded mr-3"></div>
+                      <div className="h-6 bg-gray-200 rounded w-40"></div>
+                    </div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mt-2"></div>
+                  </div>
+                  
+                  {/* Form fields */}
+                  <div className="p-6 space-y-6">
+                    {/* Name fields row */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+                        <div className="h-10 bg-gray-200 rounded"></div>
+                      </div>
+                      <div>
+                        <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+                        <div className="h-10 bg-gray-200 rounded"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Email field */}
+                    <div>
+                      <div className="h-4 bg-gray-200 rounded w-16 mb-2"></div>
+                      <div className="h-10 bg-gray-200 rounded"></div>
+                    </div>
+                    
+                    {/* Phone field */}
+                    <div>
+                      <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                      <div className="h-10 bg-gray-200 rounded"></div>
+                    </div>
+                    
+                    {/* Gender and Location row */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="h-4 bg-gray-200 rounded w-16 mb-2"></div>
+                        <div className="h-10 bg-gray-200 rounded"></div>
+                      </div>
+                      <div>
+                        <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+                        <div className="h-10 bg-gray-200 rounded"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Password fields row */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+                        <div className="h-10 bg-gray-200 rounded"></div>
+                      </div>
+                      <div>
+                        <div className="h-4 bg-gray-200 rounded w-28 mb-2"></div>
+                        <div className="h-10 bg-gray-200 rounded"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Button */}
+                    <div className="pt-6">
+                      <div className="h-10 bg-gray-200 rounded w-40 ml-auto"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Order summary skeleton */}
+              <div className="lg:col-span-1">
+                <div className="bg-white border rounded-lg shadow-sm">
+                  {/* Header */}
+                  <div className="p-6 border-b">
+                    <div className="h-6 bg-gray-200 rounded w-28"></div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="p-6 space-y-4">
+                    {/* Track info */}
+                    <div className="flex items-start space-x-4">
+                      <div className="w-16 h-16 bg-gray-200 rounded"></div>
+                      <div className="flex-grow">
+                        <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                        <div className="h-6 bg-gray-200 rounded w-20"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Separator */}
+                    <div className="h-px bg-gray-200"></div>
+                    
+                    {/* Price breakdown */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <div className="h-4 bg-gray-200 rounded w-20"></div>
+                        <div className="h-4 bg-gray-200 rounded w-12"></div>
+                      </div>
+                      <div className="flex justify-between">
+                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                        <div className="h-4 bg-gray-200 rounded w-8"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Separator */}
+                    <div className="h-px bg-gray-200"></div>
+                    
+                    {/* Total */}
+                    <div className="flex justify-between">
+                      <div className="h-5 bg-gray-200 rounded w-12"></div>
+                      <div className="h-5 bg-gray-200 rounded w-16"></div>
+                    </div>
+                    
+                    {/* Separator */}
+                    <div className="h-px bg-gray-200"></div>
+                    
+                    {/* Button */}
+                    <div className="h-10 bg-gray-200 rounded w-full"></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
