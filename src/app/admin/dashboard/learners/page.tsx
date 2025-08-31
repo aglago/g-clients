@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import PagesHeaders from '@/components/dashboard/pages-headers'
 import { Button } from '@/components/ui/button'
 import { Eye } from 'lucide-react'
-import { Learner, queryKeys, tracksApi, learnersApi, Track } from '@/lib/api'
+import { Learner, queryKeys, learnersApi, trackEnrollmentsApi } from '@/lib/api'
 import LearnerDetailsModal from '@/components/modals/learner-details-modal'
 import {
   Table,
@@ -36,10 +36,11 @@ Page() {
     queryFn: learnersApi.getAllLearners,
   })
 
-  // Fetch tracks for display
-  const { data: tracks = [] } = useQuery({
-    queryKey: [queryKeys.tracks.all],
-    queryFn: tracksApi.getAllTracks,
+
+  // Fetch enrollments to determine actual enrollment status
+  const { data: enrollments = [] } = useQuery({
+    queryKey: [queryKeys.trackEnrollments.all],
+    queryFn: trackEnrollmentsApi.getAllTrackEnrollments,
   })
 
   const [filteredLearners, setFilteredLearners] = useState<Learner[]>([])
@@ -62,14 +63,17 @@ Page() {
 
   // Function to extract searchable text from learner items
   const getLearnerSearchableText = (learner: Learner): string[] => {
-    const track = tracks.find((t: Track) => t.id === learner.trackId)
+    // Find enrollment for this learner
+    const enrollment = enrollments.find(enrollment => 
+      enrollment.learnerId && 
+      (enrollment.learnerId._id === learner.id || enrollment.learnerId.email === learner.email)
+    )
     return [
       learner.firstName || '',
       learner.lastName || '',
       learner.email || '',
       learner.location || '',
-      learner.gender || '',
-      track?.name || '',
+      enrollment?.trackId?.name || '',
     ].filter(Boolean)
   }
 
@@ -124,11 +128,16 @@ Page() {
         cell: ({ row }) => `$${(row.original.amountPaid || 0).toFixed(2)}`,
       },
       {
-        accessorKey: 'gender',
-        header: 'GENDER',
+        accessorKey: 'track',
+        header: 'TRACK',
         cell: ({ row }) => {
-          const gender = row.original.gender
-          return gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : 'Not provided'
+          const learner = row.original
+          // Find enrollment for this learner
+          const enrollment = enrollments.find(enrollment => 
+            enrollment.learnerId && 
+            (enrollment.learnerId._id === learner.id || enrollment.learnerId.email === learner.email)
+          )
+          return enrollment?.trackId?.name || 'Not enrolled'
         },
       },
       {
@@ -150,7 +159,7 @@ Page() {
         },
       },
     ],
-    [handleViewLearner]
+    [handleViewLearner, enrollments]
   )
 
   // Create table instance
@@ -321,7 +330,26 @@ Page() {
           learner={selectedLearner}
           isOpen={showDetailsModal}
           onClose={handleCloseModal}
-          track={selectedLearner?.trackId ? tracks.find(t => t.id === selectedLearner.trackId) : undefined}
+          track={selectedLearner ? (() => {
+            const enrollment = enrollments.find(enrollment => 
+              enrollment.learnerId && 
+              (enrollment.learnerId._id === selectedLearner.id || enrollment.learnerId.email === selectedLearner.email)
+            );
+            return enrollment?.trackId ? {
+              id: enrollment.trackId._id,
+              name: enrollment.trackId.name,
+              description: enrollment.trackId.description,
+              slug: '',
+              price: 0,
+              duration: 0,
+              instructor: '',
+              picture: '',
+              rating: 0,
+              reviewsCount: 0,
+              createdAt: '',
+              updatedAt: ''
+            } : undefined;
+          })() : undefined}
         />
       )}
 

@@ -19,15 +19,12 @@ export default function LearnerDetailsModal({
 }: LearnerDetailsModalProps) {
   if (!isOpen || !learner) return null;
 
-  const formatGender = (gender: string | undefined) => {
-    return gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : 'Not provided';
-  };
 
   const learnerData = [
-    { label: "Track", value: track ? track.name : "No enrolled track yet" },
+    { label: "Track", value: track ? track.name : "Not enrolled" },
     { label: "Contact", value: learner.contact },
-    { label: "Paid", value: `$${track ? track.price : "0"}` },
-    { label: "Gender", value: formatGender(learner.gender) },
+    { label: "Paid", value: `$${(learner.amountPaid || 0).toFixed(2)}` },
+    { label: "Gender", value: learner.gender ? learner.gender.charAt(0).toUpperCase() + learner.gender.slice(1) : 'Not provided' },
     { label: "Location", value: learner.location },
     { label: "Bio", value: learner.bio },
   ];

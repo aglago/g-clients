@@ -444,17 +444,23 @@ export interface Invoice {
 }
 
 // Invoice with populated learner data for display
-export interface InvoiceWithLearner extends Omit<Invoice, 'learnerId'> {
+export interface InvoiceWithLearner extends Omit<Invoice, 'learnerId' | 'trackId'> {
   learnerId: {
     firstName: string;
     lastName: string;
     email: string;
     profileImage?: string;
   };
+  trackId?: {
+    _id: string;
+    name: string;
+    price: number;
+  };
 }
 
 export interface CreateInvoiceRequest {
   learnerId: string;
+  trackId?: string;
   amount: number;
   dueDate: string;
   paymentDetails: string;
@@ -462,6 +468,7 @@ export interface CreateInvoiceRequest {
 }
 
 export interface UpdateInvoiceRequest {
+  trackId?: string;
   amount?: number;
   dueDate?: string;
   paymentDetails?: string;
@@ -506,8 +513,17 @@ const invoicesApi = {
 
 export interface TrackEnrollment {
   id: string;
-  trackId: string;
-  learnerId: string;
+  trackId: {
+    _id: string;
+    name: string;
+    description: string;
+  };
+  learnerId: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
   enrollmentDate: string;
   status: 'active' | 'completed' | 'cancelled';
   progress: number;
