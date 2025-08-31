@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     await requireAdmin(request);
     
     const body = await request.json();
-    const { learnerId, amount, dueDate, status, paymentDetails } = body;
+    const { learnerId, trackId, amount, dueDate, status, paymentDetails } = body;
     
     if (!learnerId || !amount || typeof amount !== 'number' || amount < 0) {
       return NextResponse.json(
@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
 
     const invoice = await invoiceService.createInvoice({
       learnerId,
+      trackId,
       amount,
       dueDate,
       status,

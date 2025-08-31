@@ -1,5 +1,6 @@
 import connectMongoDB from '../mongodb';
 import { Invoice, type IInvoice } from '../models';
+import mongoose from 'mongoose';
 
 export class InvoiceService {
   async getAllInvoices(): Promise<IInvoice[]> {
@@ -7,7 +8,7 @@ export class InvoiceService {
     return await Invoice.find()
       .populate('learnerId', 'firstName lastName email')
       .populate('courseId', 'title')
-      .populate('trackId', 'name')
+      .populate('trackId', 'name price')
       .sort({ createdAt: -1 });
   }
 
@@ -16,14 +17,14 @@ export class InvoiceService {
     return await Invoice.findById(id)
       .populate('learnerId', 'firstName lastName email')
       .populate('courseId', 'title')
-      .populate('trackId', 'name');
+      .populate('trackId', 'name price');
   }
 
   async getInvoicesByLearnerId(learnerId: string): Promise<IInvoice[]> {
     await connectMongoDB();
     return await Invoice.find({ learnerId })
       .populate('courseId', 'title')
-      .populate('trackId', 'name')
+      .populate('trackId', 'name price')
       .sort({ createdAt: -1 });
   }
 
@@ -37,19 +38,42 @@ export class InvoiceService {
     status?: 'unpaid' | 'paid' | 'cancelled';
   }): Promise<IInvoice> {
     await connectMongoDB();
-    const invoice = new Invoice({
+    
+    const invoicePayload: any = {
       ...invoiceData,
       dueDate: new Date(invoiceData.dueDate),
       status: invoiceData.status || 'unpaid'
-    });
+    };
+    
+    // Convert string trackId to ObjectId if provided
+    if (invoiceData.trackId) {
+      invoicePayload.trackId = new mongoose.Types.ObjectId(invoiceData.trackId);
+    }
+    
+    const invoice = new Invoice(invoicePayload);
     return await invoice.save();
   }
 
-  async updateInvoice(id: string, updates: Partial<IInvoice>): Promise<IInvoice | null> {
+  async updateInvoice(id: string, updates: Partial<{
+    trackId?: string;
+    amount?: number;
+    dueDate?: Date;
+    paymentDetails?: string;
+    status?: 'unpaid' | 'paid' | 'cancelled';
+    paymentDate?: Date;
+  }>): Promise<IInvoice | null> {
     await connectMongoDB();
+    
+    const updateData: any = { ...updates, updatedAt: new Date() };
+    
+    // Convert string trackId to ObjectId if provided
+    if (updates.trackId) {
+      updateData.trackId = new mongoose.Types.ObjectId(updates.trackId);
+    }
+    
     return await Invoice.findByIdAndUpdate(
       id,
-      { ...updates, updatedAt: new Date() },
+      updateData,
       { new: true }
     ).populate('learnerId', 'firstName lastName email')
      .populate('courseId', 'title')

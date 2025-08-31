@@ -60,9 +60,13 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { amount, dueDate, paymentDetails, status, paymentDate } = body;
+    const { trackId, amount, dueDate, paymentDetails, status, paymentDate } = body;
     
-    const updates: Partial<{amount: number; dueDate: Date; paymentDetails: string; status: 'unpaid' | 'paid' | 'cancelled'; paymentDate: Date}> = {};
+    const updates: Partial<{trackId: string; amount: number; dueDate: Date; paymentDetails: string; status: 'unpaid' | 'paid' | 'cancelled'; paymentDate: Date}> = {};
+    
+    if (trackId !== undefined) {
+      updates.trackId = trackId;
+    }
     
     if (amount !== undefined) {
       if (typeof amount !== 'number' || amount < 0) {
