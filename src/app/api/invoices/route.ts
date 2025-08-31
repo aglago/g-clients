@@ -14,7 +14,14 @@ export async function GET(request: NextRequest) {
     
     const invoices = await invoiceService.getAllInvoices();
     
-    return NextResponse.json(invoices);
+    // Parse paymentDetails JSON string to object for frontend
+    const transformedInvoices = invoices.map(invoice => ({
+      ...invoice.toObject(),
+      id: String((invoice as any)._id),
+      paymentDetails: invoice.paymentDetails ? JSON.parse(invoice.paymentDetails) : null
+    }));
+    
+    return NextResponse.json(transformedInvoices);
   } catch (error) {
     console.error('Get invoices error:', error);
     return NextResponse.json(

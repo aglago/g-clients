@@ -26,7 +26,14 @@ export async function GET(
       );
     }
     
-    return NextResponse.json(invoice);
+    // Parse paymentDetails JSON string to object for frontend
+    const transformedInvoice = {
+      ...invoice.toObject(),
+      id: String((invoice as any)._id),
+      paymentDetails: invoice.paymentDetails ? JSON.parse(invoice.paymentDetails) : null
+    };
+    
+    return NextResponse.json(transformedInvoice);
   } catch (error) {
     console.error('Get invoice error:', error);
     return NextResponse.json(
@@ -102,7 +109,14 @@ export async function PUT(
 
     const updatedInvoice = await invoiceService.updateInvoice(id, updates);
     
-    return NextResponse.json(updatedInvoice);
+    // Parse paymentDetails JSON string to object for frontend
+    const transformedInvoice = updatedInvoice ? {
+      ...updatedInvoice.toObject(),
+      id: String((updatedInvoice as any)._id),
+      paymentDetails: updatedInvoice.paymentDetails ? JSON.parse(updatedInvoice.paymentDetails) : null
+    } : null;
+    
+    return NextResponse.json(transformedInvoice);
   } catch (error) {
     if (error instanceof Error && (error.message === 'Unauthorized' || error.message === 'Forbidden: Admin access required')) {
       return NextResponse.json(
