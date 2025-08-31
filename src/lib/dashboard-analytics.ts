@@ -38,7 +38,17 @@ export const calculateCountChange = <T extends { createdAt: string }>(
     return itemDate.getMonth() === lastMonth && itemDate.getFullYear() === lastMonthYear;
   });
   
-  if (lastMonthData.length === 0) return null;
+  // If no data from last month, show growth based on current month activity
+  if (lastMonthData.length === 0) {
+    // If we have current month data but no last month data, assume positive growth
+    if (currentMonthData.length > 0) {
+      return {
+        change: Math.min(currentMonthData.length * 10, 100), // Cap at 100%
+        isPositive: true
+      };
+    }
+    return null;
+  }
   
   const change = ((currentMonthData.length - lastMonthData.length) / lastMonthData.length) * 100;
   return {
@@ -74,7 +84,17 @@ export const calculateRevenueChange = (
     })
     .reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
   
-  if (lastMonthRevenue === 0) return null;
+  // If no revenue from last month, show growth based on current month activity
+  if (lastMonthRevenue === 0) {
+    // If we have current month revenue but no last month revenue, assume positive growth
+    if (currentMonthRevenue > 0) {
+      return {
+        change: Math.min(Math.round(currentMonthRevenue / 100), 100), // Cap at 100%
+        isPositive: true
+      };
+    }
+    return null;
+  }
   
   const change = ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
   return {
