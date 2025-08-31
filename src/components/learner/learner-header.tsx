@@ -29,21 +29,16 @@ export default function LearnerHeader({ currentPage = 'home' }: LearnerHeaderPro
 
   // Determine dropdown options based on current page
   const getDropdownOptions = () => {
-    if (pathname === '/') {
-      // On home page: Portal and Logout
+    if (pathname === '/portal') {
+      // On portal page: Home and Logout
       return [
-        { label: 'Portal', icon: User, onClick: () => router.push('/portal') },
-        { label: 'Logout', icon: LogOut, onClick: handleLogout },
-      ];
-    } else if (pathname === '/portal') {
-      // On portal page: Just Logout
-      return [
+        { label: 'Home', icon: Home, onClick: () => router.push('/') },
         { label: 'Logout', icon: LogOut, onClick: handleLogout },
       ];
     } else {
-      // On other pages: Home and Logout
+      // On all other pages: Portal and Logout
       return [
-        { label: 'Home', icon: Home, onClick: () => router.push('/') },
+        { label: 'Portal', icon: User, onClick: () => router.push('/portal') },
         { label: 'Logout', icon: LogOut, onClick: handleLogout },
       ];
     }
