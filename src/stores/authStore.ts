@@ -102,7 +102,7 @@ export const useAuthStore = create<AdminAuthState>()(
             })}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
           }
           
-          toast.success('Login successful! Welcome back.');
+          toast.success('Login successful! Loading portal :).');
         } catch (error) {
           set({ isLoading: false });
           

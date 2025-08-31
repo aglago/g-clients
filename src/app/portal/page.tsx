@@ -183,13 +183,13 @@ function DashboardTab() {
           </div>
         ) : enrolledTracks.length > 0 ? (
           <div className="space-y-12">
-            {enrolledTracks.map((enrollment: EnrollmentData) => {
+            {enrolledTracks.map((enrollment: EnrollmentData, index:number) => {
               const track = enrollment.trackId;
               const trackId = track._id?.toString() || track.id?.toString() || '';
               const trackCourses = trackId ? getCoursesForTrack(trackId) : [];
               
               return (
-                <div key={enrollment.id} className="space-y-6">
+                <div key={index} className="space-y-6">
                   <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
                     {track.name} Track
                   </h3>
@@ -614,7 +614,7 @@ function InvoicesTab() {
                 ) : userInvoices.length > 0 ? (
                   userInvoices.map((invoice: InvoiceData, index: number) => (
                     <TableRow
-                      key={invoice.id}
+                      key={index}
                       className={`h-[76px] border-none`}
                     >
                       <TableCell className="px-6 font-medium">

@@ -14,11 +14,11 @@ export default function LearnerAuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen">
       <LearnerHeader />
-      <div className="flex !max-w-7xl mx-auto">
+      <div className="flex max-w-7xl mx-auto">
         {/* Left side - Image */}
-        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center">
           <Image
             src="/images/learner/auth/auth-left.svg"
             alt="Learning"
