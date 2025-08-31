@@ -65,7 +65,8 @@ export const useAuthStore = create<AdminAuthState>()(
             document.cookie = `auth-storage=${JSON.stringify({
               state: {
                 token: response.token,
-                isAuthenticated: true
+                isAuthenticated: true,
+                user: response.user
               }
             })}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
           }
@@ -95,7 +96,8 @@ export const useAuthStore = create<AdminAuthState>()(
             document.cookie = `auth-storage=${JSON.stringify({
               state: {
                 token: response.token,
-                isAuthenticated: true
+                isAuthenticated: true,
+                user: response.user
               }
             })}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
           }
@@ -137,7 +139,8 @@ export const useAuthStore = create<AdminAuthState>()(
             document.cookie = `auth-storage=${JSON.stringify({
               state: {
                 token: response.token,
-                isAuthenticated: true
+                isAuthenticated: true,
+                user: response.user
               }
             })}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
           }
@@ -249,7 +252,8 @@ export const useAuthStore = create<AdminAuthState>()(
         document.cookie = `auth-storage=${JSON.stringify({
           state: {
             token,
-            isAuthenticated: true
+            isAuthenticated: true,
+            user
           }
         })}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
       }
@@ -268,7 +272,8 @@ export const useAuthStore = create<AdminAuthState>()(
           document.cookie = `auth-storage=${JSON.stringify({
             state: {
               token: state.token,
-              isAuthenticated: state.isAuthenticated
+              isAuthenticated: state.isAuthenticated,
+              user: state.user
             }
           })}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
         }

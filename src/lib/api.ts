@@ -44,9 +44,10 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('auth-storage');
       document.cookie = 'auth-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       
-      // Reload the page to trigger auth guard
+      // Redirect to appropriate login page based on current path
       if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+        const isAdminPath = window.location.pathname.startsWith('/admin');
+        window.location.href = isAdminPath ? '/admin/login' : '/login';
       }
     }
     return Promise.reject(error);
