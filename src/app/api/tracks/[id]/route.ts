@@ -81,7 +81,12 @@ export async function PUT(
           { status: 400 }
         );
       }
-      updates.courses = courses.map(courseId => new Types.ObjectId(courseId));
+      updates.courses = courses.map(courseId => {
+        if (!Types.ObjectId.isValid(courseId)) {
+          throw new Error(`Invalid course ID: ${courseId}`);
+        }
+        return new Types.ObjectId(courseId);
+      });
     }
 
     if (Object.keys(updates).length === 0) {

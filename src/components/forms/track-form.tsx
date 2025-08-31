@@ -93,13 +93,17 @@ export default function TrackForm({ track, onSubmit, isLoading = false }: TrackF
       const formData = {
         ...data,
         picture: pictureUrl,
-        courses: track?.courses || [], // Keep existing courses for updates, empty array for new tracks
+        // Don't include courses in updates to avoid the ObjectId issue
       };
       
       await onSubmit(formData);
     } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to upload image. Please try again.');
+      console.error('Form submission error:', error);
+      if (uploadingImage) {
+        toast.error('Failed to upload image. Please try again.');
+      } else {
+        toast.error('Failed to save track. Please try again.');
+      }
     } finally {
       setUploadingImage(false);
     }

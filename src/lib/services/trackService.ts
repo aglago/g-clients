@@ -44,7 +44,7 @@ export class TrackService {
   }
 
   // Helper method to create slug (same as in Track model)
-  private createSlug(name: string): string {
+  public createSlug(name: string): string {
     return name
       .toLowerCase()
       .replace(/[^a-z0-9 -]/g, '') // Remove special characters
@@ -64,7 +64,10 @@ export class TrackService {
     courses?: string[];
   }): Promise<ITrack> {
     await connectMongoDB();
-    const track = new Track(trackData);
+    const track = new Track({
+      ...trackData,
+      slug: this.createSlug(trackData.name)
+    });
     return await track.save();
   }
 

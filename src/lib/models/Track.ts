@@ -46,8 +46,8 @@ const TrackSchema = new Schema<ITrack>({
   timestamps: true,
 });
 
-// Pre-save middleware to generate slug
-TrackSchema.pre('save', function(next) {
+// Pre-validate middleware to generate slug before validation
+TrackSchema.pre('validate', function(next) {
   if (this.isModified('name') || this.isNew) {
     this.slug = createSlug(this.name);
   }

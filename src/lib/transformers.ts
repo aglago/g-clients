@@ -14,11 +14,12 @@ export function transformTrackDocument(track: ITrack): Track {
     picture: track.picture,
     description: track.description,
     courses: track.courses ? track.courses.map(course => {
-      // If course is populated, extract the title. If not, return the ObjectId as string
+      // If course is populated, return course title for display
       if (typeof course === 'object' && course !== null && 'title' in course) {
         return (course as { title: string }).title;
       }
-      return course.toString();
+      // If not populated, return the ObjectId as string
+      return String(course);
     }) : [],
     rating: track.rating || 0,
     reviewsCount: track.reviewsCount || 0,
