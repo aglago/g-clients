@@ -110,6 +110,8 @@ export interface UpdateProfileRequest {
   lastName?: string;
   contact?: string;
   profileImage?: string;
+  gender?: 'male' | 'female' | 'other';
+  location?: string;
 }
 
 export interface AuthResponse {
@@ -125,6 +127,8 @@ export interface AuthResponse {
     role: string;
     contact?: string;
     profileImage?: string;
+    gender?: 'male' | 'female' | 'other';
+    location?: string;
   };
 }
 

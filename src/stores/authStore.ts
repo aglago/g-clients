@@ -19,7 +19,7 @@ interface AdminAuthState {
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string, confirmPassword: string) => Promise<void>;
   updatePassword: (currentPassword: string, newPassword: string, confirmPassword: string) => Promise<void>;
-  updateProfile: (firstName: string, lastName: string, contact?: string, profileImage?: string) => Promise<void>;
+  updateProfile: (firstName: string, lastName: string, contact?: string, profileImage?: string, gender?: 'male' | 'female' | 'other', location?: string) => Promise<void>;
   logout: () => Promise<void>;
   // Auto-login method for checkout flow
   setAuthData: (user: AuthResponse['user'], token: string) => void;
@@ -202,9 +202,9 @@ export const useAuthStore = create<AdminAuthState>()(
         }
       },
 
-      updateProfile: async (firstName, lastName, contact, profileImage) => {
+      updateProfile: async (firstName, lastName, contact, profileImage, gender, location) => {
         try {
-          const response = await authApi.updateProfile({ firstName, lastName, contact, profileImage });
+          const response = await authApi.updateProfile({ firstName, lastName, contact, profileImage, gender, location });
           
           // Update user data in store
           set((state) => ({ 

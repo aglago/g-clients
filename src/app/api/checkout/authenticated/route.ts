@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { trackService, invoiceService, enrollmentService } from '@/lib/services';
+import { trackService, invoiceService, enrollmentService, userService } from '@/lib/services';
 import { sendEmail } from '@/lib/email';
 import { getUserFromRequest } from '@/lib/auth';
 
@@ -7,6 +7,8 @@ interface AuthenticatedCheckoutData {
   trackSlug: string;
   paymentSuccess: boolean;
   paymentDetails?: Record<string, unknown>;
+  gender?: 'male' | 'female' | 'other';
+  location?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -21,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data: AuthenticatedCheckoutData = await request.json();
-    const { trackSlug, paymentSuccess, paymentDetails } = data;
+    const { trackSlug, paymentSuccess, paymentDetails, gender, location } = data;
 
     // Validate required fields
     if (!trackSlug) {
@@ -54,6 +56,15 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+      // Update user profile if gender or location provided
+      if (gender || location) {
+        const updateData: { gender?: 'male' | 'female' | 'other'; location?: string } = {};
+        if (gender) updateData.gender = gender;
+        if (location) updateData.location = location;
+        
+        await userService.updateUser(user.id, updateData);
+      }
+
       if (paymentSuccess) {
         // Payment successful - create enrollment and paid invoice
         
