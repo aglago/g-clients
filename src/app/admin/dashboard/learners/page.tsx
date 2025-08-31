@@ -121,14 +121,14 @@ Page() {
       {
         accessorKey: 'amountPaid',
         header: 'AMOUNT',
-        cell: ({ row }) => `$${row.original.amountPaid.toFixed(2)}`,
+        cell: ({ row }) => `$${(row.original.amountPaid || 0).toFixed(2)}`,
       },
       {
         accessorKey: 'gender',
         header: 'GENDER',
         cell: ({ row }) => {
           const gender = row.original.gender
-          return gender.charAt(0).toUpperCase() + gender.slice(1)
+          return gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : 'Not provided'
         },
       },
       {

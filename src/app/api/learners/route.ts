@@ -1,5 +1,6 @@
+
 import { NextRequest, NextResponse } from 'next/server';
-import { userService } from '@/lib/services';
+import { userService, invoiceService } from '@/lib/services';
 import { requireAdmin, hashPassword } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -8,15 +9,32 @@ export async function GET(request: NextRequest) {
     
     const learners = await userService.getLearners();
     
-    const sanitizedLearners = learners.map(learner => ({
-      id: learner.id,
-      firstName: learner.firstName,
-      lastName: learner.lastName,
-      email: learner.email,
-      contact: learner.contact,
-      createdAt: learner.createdAt,
-      updatedAt: learner.updatedAt
-    }));
+    // Get all invoices to calculate amount paid for each learner
+    const allInvoices = await invoiceService.getAllInvoices();
+    
+    const sanitizedLearners = learners.map(learner => {
+      // Calculate total amount paid from paid invoices
+      const learnerInvoices = allInvoices.filter(invoice => {
+        // learnerId is populated, so it's an object with _id
+        const invoiceLearnerIdStr = (invoice.learnerId as { _id: unknown })?._id?.toString() || invoice.learnerId.toString();
+        return invoiceLearnerIdStr === String((learner as { _id: unknown })._id) && invoice.status === 'paid';
+      });
+      const amountPaid = learnerInvoices.reduce((total, invoice) => total + invoice.amount, 0);
+      
+      return {
+        id: learner.id,
+        firstName: learner.firstName,
+        lastName: learner.lastName,
+        email: learner.email,
+        contact: learner.contact,
+        gender: learner.gender,
+        location: learner.location,
+        bio: learner.bio,
+        amountPaid,
+        createdAt: learner.createdAt,
+        updatedAt: learner.updatedAt
+      };
+    });
     
     return NextResponse.json(sanitizedLearners);
   } catch (error) {

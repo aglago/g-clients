@@ -19,8 +19,8 @@ export default function LearnerDetailsModal({
 }: LearnerDetailsModalProps) {
   if (!isOpen || !learner) return null;
 
-  const formatGender = (gender: string) => {
-    return gender.charAt(0).toUpperCase() + gender.slice(1);
+  const formatGender = (gender: string | undefined) => {
+    return gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : 'Not provided';
   };
 
   const learnerData = [
