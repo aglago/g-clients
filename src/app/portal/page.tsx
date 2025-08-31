@@ -3,8 +3,7 @@
 import { useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
-import { userApi } from '@/lib/api';
-import LearnerGuard from '@/components/auth/learner-guard';
+import { userApi, coursesApi } from '@/lib/api';
 import LearnerHeader from '@/components/learner/learner-header';
 import LearnerFooter from '@/components/learner/learner-footer';
 import Image from 'next/image';
@@ -12,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
@@ -19,40 +19,49 @@ import {
   Settings, 
   FileText, 
   Star,
+  BookOpen,
+  User,
+  Lock,
+  LogOut,
   Camera,
-  LogOut 
+  Eye
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 type ActiveTab = 'dashboard' | 'settings' | 'invoices';
 
-interface EnrollmentWithTrack {
-  _id: string;
-  trackId: {
-    _id: string;
-    title: string;
-    description: string;
-    price: number;
-    image: string;
-    courses: Array<{
-      _id: string;
-      title: string;
-      description: string;
-      duration: number;
-    }>;
-  };
-  status: string;
-  enrolledAt: string;
+interface TrackData {
+  _id?: string;
+  id?: string;
+  name: string;
+  slug: string;
+  description: string;
+  duration: number;
+  courses?: Array<unknown>;
 }
 
-interface UserInvoice {
-  _id: string;
-  invoiceNumber: string;
-  trackId: {
-    title: string;
-  };
+interface EnrollmentData {
+  id: string;
+  trackId: TrackData;
+}
+
+interface CourseData {
+  id: string;
+  title: string;
+  track: string;
+  description?: string;
+  picture?: string;
+}
+
+interface InvoiceData {
+  id: string;
+  trackName?: string;
+  trackId?: string;
+  courseId?: string;
+  createdAt: string;
   amount: number;
   status: string;
-  createdAt: string;
 }
 
 export default function PortalPage() {
@@ -65,69 +74,66 @@ export default function PortalPage() {
   ] as const;
 
   return (
-    <LearnerGuard>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <LearnerHeader />
-        
-        {/* Hero Section with Navigation */}
-        <section className="bg-primary pt-14">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="py-12">
-              <div className="text-center mb-8">
-                <h1 className="text-4xl font-bold text-white mb-4">
-                  Welcome to Your Portal
-                </h1>
-                <p className="text-xl text-white/90">
-                  Manage your learning journey and track your progress
-                </p>
-              </div>
-              
-              {/* Tab Navigation */}
-              <div className="flex justify-center">
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-1">
-                  <div className="flex space-x-1">
-                    {tabs.map((tab) => {
-                      const Icon = tab.icon;
-                      return (
-                        <button
-                          key={tab.id}
-                          onClick={() => setActiveTab(tab.id)}
-                          className={`flex items-center space-x-2 px-6 py-3 rounded-md font-medium transition-all ${
-                            activeTab === tab.id
-                              ? 'bg-white text-primary shadow-sm'
-                              : 'text-white/80 hover:text-white hover:bg-white/10'
-                          }`}
-                        >
-                          <Icon className="h-5 w-5" />
-                          <span>{tab.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
+    <div className="min-h-screen bg-gray-50">
+      <LearnerHeader />
+      
+      {/* Hero Section with Navigation */}
+      <section className="bg-primary pt-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+              Learner Portal
+            </h1>
+            <p className="text-xl text-white/90">
+              Welcome back, {user?.firstName}!
+            </p>
+          </div> */}
+
+          {/* Tab Navigation */}
+          <div className="flex w-full md:h-[76px] bg-white justify-start">
+            <div className="flex bg-white/10 rounded-lg">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as ActiveTab)}
+                    className={cn(
+                      "flex items-center gap-2 px-6 py-3 text-[16px] font-bold transition-all",
+                      activeTab === tab.id
+                        ? "bg-[#014273] text-background shadow-sm"
+                        : "text-black hover:text-background hover:bg-primary"
+                    )}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Main Content */}
-        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Content Section */}
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {activeTab === 'dashboard' && <DashboardTab />}
           {activeTab === 'settings' && <SettingsTab />}
           {activeTab === 'invoices' && <InvoicesTab />}
-        </main>
+        </div>
+      </section>
 
-        <LearnerFooter />
-      </div>
-    </LearnerGuard>
+      <LearnerFooter />
+    </div>
   );
 }
 
 // Dashboard Tab Component
 function DashboardTab() {
   const { user } = useAuthStore();
-  const [ratings, setRatings] = useState<Record<string, number>>({});
-  const [feedback, setFeedback] = useState<Record<string, string>>({});
+  const [ratings, setRatings] = useState<{[trackId: string]: number}>({});
+  const [feedback, setFeedback] = useState<{[trackId: string]: string}>({});
 
   const { data: enrolledTracks = [], isLoading: tracksLoading } = useQuery({
     queryKey: ['user-enrollments', user?.email],
@@ -135,119 +141,160 @@ function DashboardTab() {
     enabled: !!user,
   });
 
-  const handleRatingChange = (trackId: string, rating: number) => {
-    setRatings(prev => ({ ...prev, [trackId]: rating }));
-  };
+  const { data: allCourses = [], isLoading: coursesLoading } = useQuery({
+    queryKey: ['courses'],
+    queryFn: coursesApi.getAllCourses,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
-  const handleFeedbackChange = (trackId: string, value: string) => {
-    setFeedback(prev => ({ ...prev, [trackId]: value }));
+  // Group courses by track
+  const getCoursesForTrack = (trackId: string) => {
+    return allCourses.filter((course: CourseData) => course.track === trackId);
   };
-
-  const submitRating = async (trackId: string) => {
-    // TODO: Implement rating submission API
-    console.log('Submitting rating:', { trackId, rating: ratings[trackId], feedback: feedback[trackId] });
-  };
-
-  if (tracksLoading) {
-    return (
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-900">Your Learning Dashboard</h2>
-        <div className="animate-pulse space-y-4">
-          <div className="h-48 bg-gray-200 rounded-lg"></div>
-          <div className="h-48 bg-gray-200 rounded-lg"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Your Learning Dashboard</h2>
-      
-      {enrolledTracks.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No enrollments yet</h3>
-            <p className="text-gray-600">Start your learning journey by enrolling in a track!</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          {enrolledTracks.map((enrollment: EnrollmentWithTrack) => (
-            <Card key={enrollment._id} className="overflow-hidden">
-              <div className="aspect-video relative">
-                <Image
-                  src={enrollment.trackId.image || '/images/placeholder-track.jpg'}
-                  alt={enrollment.trackId.title}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute top-4 right-4">
-                  <Badge 
-                    variant={enrollment.status === 'completed' ? 'default' : 'secondary'}
-                    className="capitalize"
-                  >
-                    {enrollment.status}
-                  </Badge>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-8">Your Enrolled Tracks</h2>
+        
+        {tracksLoading || coursesLoading ? (
+          <div className="space-y-8">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="space-y-4">
+                <div className="h-8 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 3 }).map((_, j) => (
+                    <Card key={j} className="animate-pulse">
+                      <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-4 bg-gray-200 rounded"></div>
+                          <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </div>
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-2">{enrollment.trackId.title}</h3>
-                <p className="text-gray-600 mb-4">{enrollment.trackId.description}</p>
-                
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Courses in this track:</h4>
-                    <ul className="space-y-1">
-                      {enrollment.trackId.courses?.map((course) => (
-                        <li key={course._id} className="text-sm text-gray-600 flex items-center">
-                          <span className="w-2 h-2 bg-primary rounded-full mr-2"></span>
-                          {course.title}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Rating Section */}
-                  <div className="border-t pt-4">
-                    <h4 className="font-medium mb-2">Rate this track:</h4>
-                    <div className="flex items-center space-x-1 mb-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          onClick={() => handleRatingChange(enrollment.trackId._id, star)}
-                          className={`h-6 w-6 ${
-                            star <= (ratings[enrollment.trackId._id] || 0)
-                              ? 'text-yellow-400'
-                              : 'text-gray-300'
-                          }`}
-                        >
-                          <Star className="h-full w-full fill-current" />
-                        </button>
+            ))}
+          </div>
+        ) : enrolledTracks.length > 0 ? (
+          <div className="space-y-12">
+            {enrolledTracks.map((enrollment: EnrollmentData) => {
+              const track = enrollment.trackId;
+              const trackId = track._id?.toString() || track.id?.toString() || '';
+              const trackCourses = trackId ? getCoursesForTrack(trackId) : [];
+              
+              return (
+                <div key={enrollment.id} className="space-y-6">
+                  <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
+                    {track.name} Track
+                  </h3>
+                  
+                  {trackCourses.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {trackCourses.map((course: CourseData) => (
+                        <Card key={course.id} className="shadow-lg hover:shadow-lg transition-shadow overflow-hidden py-0">
+                          <div className="relative h-48 w-full">
+                            <Image
+                              src={course.picture || '/images/course-placeholder.jpg'}
+                              alt={course.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <h4 className="font-semibold text-lg text-gray-900 line-clamp-1">
+                                {course.title}
+                              </h4>
+                              <p className="text-sm text-gray-600 line-clamp-2">
+                                {course.description}
+                              </p>
+                              <div className="flex justify-between items-center pt-2">
+                                <Badge variant="default" className="bg-primary text-white">
+                                  Registered
+                                </Badge>
+                                <Button size="sm" variant="outline" asChild>
+                                  <Link href={`/tracks/${track.slug}`}>
+                                    Start Learning
+                                  </Link>
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
-                    <textarea
-                      placeholder="Share your feedback..."
-                      value={feedback[enrollment.trackId._id] || ''}
-                      onChange={(e) => handleFeedbackChange(enrollment.trackId._id, e.target.value)}
-                      className="w-full p-2 border rounded-md text-sm resize-none"
-                      rows={2}
-                    />
-                    <Button
-                      onClick={() => submitRating(enrollment.trackId._id)}
-                      className="mt-2"
-                      size="sm"
-                      disabled={!ratings[enrollment.trackId._id]}
-                    >
-                      Submit Rating
-                    </Button>
-                  </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500">No courses available for this track</p>
+                    </div>
+                  )}
+                  
+                  {/* Rating Section for this Track */}
+                  <Card className="mt-6">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Rate {track.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label>How would you rate your experience with this track?</Label>
+                        <div className="flex gap-1 mt-2">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              onClick={() => setRatings(prev => ({...prev, [trackId]: star}))}
+                              className={cn(
+                                "p-1 transition-colors",
+                                star <= (ratings[trackId] || 0) ? "text-[#d89612]" : "text-gray-300"
+                              )}
+                            >
+                              <Star className="w-6 h-6 fill-current" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor={`feedback-${trackId}`}>Tell us about your experience with this track (optional)</Label>
+                        <Textarea
+                          id={`feedback-${trackId}`}
+                          placeholder={`Share your thoughts about ${track.name}...`}
+                          value={feedback[trackId] || ''}
+                          onChange={(e) => setFeedback(prev => ({...prev, [trackId]: e.target.value}))}
+                          className="mt-1"
+                        />
+                      </div>
+                      
+                      <Button disabled={(ratings[trackId] || 0) === 0} size="sm">
+                        Submit Rating for {track.name}
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        ) : (
+          <Card className="text-center py-12 shadow-none border-none">
+            <CardContent>
+              <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Enrolled Tracks</h3>
+              <p className="text-gray-600 mb-6">
+                Start your learning journey by enrolling in a track
+              </p>
+              <Button asChild>
+                <Link href="/tracks">Browse Tracks</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
@@ -256,11 +303,12 @@ function DashboardTab() {
 function SettingsTab() {
   const { user, updateProfile, logout } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
+  const [profileImage, setProfileImage] = useState(user?.profileImage || '');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [profileData, setProfileData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
-    email: user?.email || '',
     contact: user?.contact || '',
   });
   const [passwordData, setPasswordData] = useState({
@@ -268,29 +316,41 @@ function SettingsTab() {
     newPassword: '',
     confirmPassword: '',
   });
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const getInitials = () => {
+    const firstInitial = user?.firstName?.charAt(0) || '';
+    const lastInitial = user?.lastName?.charAt(0) || '';
+    return `${firstInitial}${lastInitial}`;
+  };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setIsUploadingImage(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
+      setIsUploadingImage(true);
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
+
+      if (!response.ok) throw new Error('Upload failed');
+
+      const data = await response.json();
+      setProfileImage(data.url);
       
-      if (response.ok) {
-        const data = await response.json();
-        // TODO: Update user profile with new image
-        console.log('Image uploaded:', data.url);
-      }
+      // Update the profile with the new image
+      await updateProfile(
+        user?.firstName || '',
+        user?.lastName || '',
+        user?.contact || '',
+        data.url
+      );
     } catch (error) {
-      console.error('Image upload failed:', error);
+      console.error('Image upload error:', error);
     } finally {
       setIsUploadingImage(false);
     }
@@ -301,88 +361,85 @@ function SettingsTab() {
       await updateProfile(
         profileData.firstName,
         profileData.lastName,
-        profileData.contact,
-        user?.profileImage
+        profileData.contact
       );
       setIsEditing(false);
     } catch (error) {
-      console.error('Profile update failed:', error);
+      console.error('Profile update error:', error);
     }
   };
 
   const handleLogout = async () => {
     try {
       await logout();
+      window.location.href = '/';
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Logout error:', error);
     }
   };
 
-  const getInitials = () => {
-    return `${user?.firstName?.charAt(0) || ''}${user?.lastName?.charAt(0) || ''}`.toUpperCase();
-  };
-
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Account Settings</h2>
-      
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Profile Image Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile Photo</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <div className="flex justify-center">
-              {user?.profileImage ? (
-                <div className="relative">
-                  <Image
-                    src={user.profileImage}
-                    alt="Profile"
-                    width={80}
-                    height={80}
-                    className="rounded-full object-cover"
-                  />
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Profile Image Section */}
+      <div className="space-y-6">
+          <div className="text-center">
+            <div className="flex flex-col items-center mb-8">
+              <div className="relative">
+                <div className="w-56 h-56 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg">
+                  {profileImage ? (
+                    <Image
+                      src={profileImage}
+                      alt="Profile"
+                      width={128}
+                      height={128}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-4xl font-bold">
+                      {getInitials()}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-white text-xl font-semibold">
-                  {getInitials()}
-                </div>
-              )}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingImage}
+                  className="absolute bottom-2 right-2 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors shadow-lg disabled:opacity-50"
+                >
+                  <Camera className="w-5 h-5" />
+                </button>
+              </div>
             </div>
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              className="hidden"
               onChange={handleImageUpload}
+              className="hidden"
             />
-            <Button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploadingImage}
-              variant="outline"
-              className="w-full"
-            >
-              <Camera className="h-4 w-4 mr-2" />
-              {isUploadingImage ? 'Uploading...' : 'Change Photo'}
-            </Button>
-          </CardContent>
-        </Card>
+          </div>
+      </div>
 
-        {/* Profile Settings */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Profile Information</CardTitle>
-            <Button
-              onClick={() => setIsEditing(!isEditing)}
-              variant="outline"
-              size="sm"
-            >
-              {isEditing ? 'Cancel' : 'Edit'}
-            </Button>
+      {/* Profile & Password Section */}
+      <div className="space-y-6 col-span-2">
+        {/* Profile Section */}
+        <Card className='bg-gray-background'>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Profile Information
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                {isEditing ? 'Cancel' : 'Edit'}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName">First Name</Label>
                 <Input
@@ -402,16 +459,17 @@ function SettingsTab() {
                 />
               </div>
             </div>
+            
             <div>
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                type="email"
                 value={user?.email || ''}
                 disabled
                 className="bg-gray-50"
               />
             </div>
+            
             <div>
               <Label htmlFor="contact">Contact</Label>
               <Input
@@ -421,22 +479,29 @@ function SettingsTab() {
                 disabled={!isEditing}
               />
             </div>
+
             {isEditing && (
-              <Button onClick={handleProfileUpdate} className="w-full">
-                Save Changes
-              </Button>
+              <div className="flex gap-2 pt-4">
+                <Button onClick={handleProfileUpdate}>
+                  Save Changes
+                </Button>
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
-      </div>
 
-      {/* Password Change Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Change Password</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
+        {/* Password Section */}
+        <Card className='bg-gray-background'>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="w-5 h-5" />
+              Change Password
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div>
               <Label htmlFor="currentPassword">Current Password</Label>
               <Input
@@ -446,6 +511,7 @@ function SettingsTab() {
                 onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
               />
             </div>
+            
             <div>
               <Label htmlFor="newPassword">New Password</Label>
               <Input
@@ -455,8 +521,9 @@ function SettingsTab() {
                 onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
               />
             </div>
+            
             <div>
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -464,28 +531,30 @@ function SettingsTab() {
                 onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
               />
             </div>
-          </div>
-          <Button className="w-full md:w-auto">
-            Update Password
-          </Button>
-        </CardContent>
-      </Card>
 
-      {/* Logout Section */}
-      <Card className="border-red-200">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-medium text-gray-900">Sign out of your account</h3>
-              <p className="text-sm text-gray-600">You will be redirected to the home page</p>
-            </div>
-            <Button onClick={handleLogout} variant="destructive">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
+            <Button>Update Password</Button>
+          </CardContent>
+        </Card>
+
+        {/* Logout Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-600">
+              <LogOut className="w-5 h-5" />
+              Account Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 mb-4">
+              Sign out of your account securely
+            </p>
+            <Button variant="destructive" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
             </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
@@ -502,55 +571,69 @@ function InvoicesTab() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Payment History</h2>
+      <h2 className="text-2xl font-bold text-gray-900">Past Invoices</h2>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Invoices</CardTitle>
-        </CardHeader>
+      <Card className='border-none shadow-xl'>
         <CardContent>
-          <div className="overflow-x-auto">
-            {isLoading ? (
-              <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-gray-200 rounded w-full"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              </div>
-            ) : userInvoices.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No invoices found</p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Invoice #</TableHead>
-                    <TableHead>Track</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {userInvoices.map((invoice: UserInvoice) => (
-                    <TableRow key={invoice._id}>
-                      <TableCell className="font-medium">
-                        {invoice.invoiceNumber}
+          <div className="rounded-lg">
+            <Table>
+              <TableHeader className='font-semibold text-[16px] font-figtree py-3.5 border-b-1'>
+                <TableRow className="border-none">
+                  <TableHead className="px-6 h-14 font-semibold">NUMBER</TableHead>
+                  <TableHead className="px-6 h-14 font-semibold">TRACK</TableHead>
+                  <TableHead className="px-6 h-14 font-semibold">DATE</TableHead>
+                  <TableHead className="px-6 h-14 font-semibold">AMOUNT</TableHead>
+                  <TableHead className="px-6 h-14 font-semibold">STATUS</TableHead>
+                  <TableHead className="px-6 h-14 font-semibold"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: 4 }).map((_, index) => (
+                    <TableRow key={index} className="!h-[76px]">
+                      <TableCell className="px-6">
+                        <div className="h-4 w-16 bg-muted rounded animate-pulse" />
                       </TableCell>
-                      <TableCell>
-                        {invoice.trackId.title}
+                      <TableCell className="px-6">
+                        <div className="h-4 w-32 bg-muted rounded animate-pulse" />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="px-6">
+                        <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+                      </TableCell>
+                      <TableCell className="px-6">
+                        <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+                      </TableCell>
+                      <TableCell className="px-6">
+                        <div className="h-6 w-16 bg-muted rounded animate-pulse" />
+                      </TableCell>
+                      <TableCell className="px-6">
+                        <div className="h-8 w-8 bg-muted rounded animate-pulse" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : userInvoices.length > 0 ? (
+                  userInvoices.map((invoice: InvoiceData, index: number) => (
+                    <TableRow
+                      key={invoice.id}
+                      className={`h-[76px] border-none`}
+                    >
+                      <TableCell className="px-6 font-medium">
+                        #{(index + 1).toString().padStart(4, '0')}
+                      </TableCell>
+                      <TableCell className="px-6">
+                        {invoice.trackName || 'Course Enrollment'}
+                      </TableCell>
+                      <TableCell className="px-6">
                         {new Date(invoice.createdAt).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'short',
                           day: 'numeric',
                         })}
                       </TableCell>
-                      <TableCell className="font-medium">
+                      <TableCell className="px-6 font-medium">
                         ${invoice.amount.toFixed(2)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="px-6">
                         <Badge 
                           variant={
                             invoice.status === 'paid' 
@@ -564,11 +647,28 @@ function InvoicesTab() {
                           {invoice.status}
                         </Badge>
                       </TableCell>
+                      <TableCell className="px-6">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-12">
+                      <div className="flex flex-col items-center">
+                        <FileText className="w-16 h-16 text-gray-300 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No Invoices Found</h3>
+                        <p className="text-gray-600">
+                          Your payment history will appear here once you make your first enrollment
+                        </p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
