@@ -12,7 +12,7 @@ G-Clients is a production-ready LMS featuring dual authentication systems, compr
 - **📚 Track & Course Management**: Hierarchical learning structure with tracks containing multiple courses
 - **🎯 Smart Enrollment System**: Automated checkout flow with account creation and payment processing
 - **📈 Progress Tracking**: Real-time learning progress with completion tracking and rating system
-- **💳 Integrated Billing**: Complete invoice management with payment status tracking
+- **💳 Integrated Billing**: Complete invoice management with simulated payment processing (ready for real gateway integration)
 - **📧 Email Automation**: Automated notifications for registration, enrollment, and payment events
 - **🔐 Secure Authentication**: JWT-based auth with OTP email verification and password reset
 - **📊 Analytics Dashboard**: Revenue charts, enrollment metrics, and comprehensive reporting
@@ -260,7 +260,8 @@ src/
 ### Payment Security
 - **User Verification**: Prevents unauthorized charges to existing accounts
 - **Invoice Tracking**: Complete audit trail for all transactions
-- **Secure Checkout**: Multi-step verification process
+- **Secure Checkout**: Multi-step verification process with simulated payment flow
+- **Ready for Integration**: Architecture prepared for real payment gateway implementation
 
 ## 📈 Analytics & Reporting
 
@@ -334,6 +335,7 @@ npm run type-check   # TypeScript type checking
 ### Payment Processing
 - **Automated Invoicing**: Instant invoice generation upon enrollment
 - **Payment Status Tracking**: Complete audit trail for all transactions
+- **Simulated Payment Flow**: Payment processing simulation ready for real gateway integration
 - **Failed Payment Handling**: Graceful handling with retry mechanisms
 - **Email Notifications**: Automated communication for all payment events
 

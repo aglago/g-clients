@@ -18,11 +18,16 @@ export async function GET(request: NextRequest) {
     const invoices = await invoiceService.getInvoicesByLearnerId(userId);
     
     // Transform the data to include trackName for frontend consumption
-    const transformedInvoices = invoices.map(invoice => ({
-      ...invoice.toObject(),
-      trackName: invoice.trackId?.name || null,
-      courseName: invoice.courseId?.title || null
-    }));
+    const transformedInvoices = invoices.map(invoice => {
+      const invoiceObj = invoice.toObject();
+      return {
+        ...invoiceObj,
+        trackName: (invoice.trackId && typeof invoice.trackId === 'object' && 'name' in invoice.trackId) 
+          ? invoice.trackId.name : null,
+        courseName: (invoice.courseId && typeof invoice.courseId === 'object' && 'title' in invoice.courseId) 
+          ? invoice.courseId.title : null
+      };
+    });
     
     return NextResponse.json({
       success: true,

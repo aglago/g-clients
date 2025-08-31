@@ -39,16 +39,15 @@ export class InvoiceService {
   }): Promise<IInvoice> {
     await connectMongoDB();
     
-    const invoicePayload: any = {
-      ...invoiceData,
+    const invoicePayload = {
+      learnerId: invoiceData.learnerId,
+      amount: invoiceData.amount,
       dueDate: new Date(invoiceData.dueDate),
-      status: invoiceData.status || 'unpaid'
+      paymentDetails: invoiceData.paymentDetails,
+      status: invoiceData.status || 'unpaid' as const,
+      ...(invoiceData.trackId && { trackId: new mongoose.Types.ObjectId(invoiceData.trackId) }),
+      ...(invoiceData.courseId && { courseId: new mongoose.Types.ObjectId(invoiceData.courseId) })
     };
-    
-    // Convert string trackId to ObjectId if provided
-    if (invoiceData.trackId) {
-      invoicePayload.trackId = new mongoose.Types.ObjectId(invoiceData.trackId);
-    }
     
     const invoice = new Invoice(invoicePayload);
     return await invoice.save();
@@ -64,7 +63,10 @@ export class InvoiceService {
   }>): Promise<IInvoice | null> {
     await connectMongoDB();
     
-    const updateData: any = { ...updates, updatedAt: new Date() };
+    const updateData: Record<string, unknown> = { 
+      ...updates, 
+      updatedAt: new Date()
+    };
     
     // Convert string trackId to ObjectId if provided
     if (updates.trackId) {

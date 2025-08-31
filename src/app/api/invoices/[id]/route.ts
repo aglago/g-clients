@@ -29,7 +29,7 @@ export async function GET(
     // Parse paymentDetails JSON string to object for frontend
     const transformedInvoice = {
       ...invoice.toObject(),
-      id: String((invoice as any)._id),
+      id: String(invoice._id),
       paymentDetails: invoice.paymentDetails ? JSON.parse(invoice.paymentDetails) : null
     };
     
@@ -116,7 +116,7 @@ export async function PUT(
     // Parse paymentDetails JSON string to object for frontend
     const transformedInvoice = updatedInvoice ? {
       ...updatedInvoice.toObject(),
-      id: String((updatedInvoice as any)._id),
+      id: String(updatedInvoice._id),
       paymentDetails: updatedInvoice.paymentDetails ? JSON.parse(updatedInvoice.paymentDetails) : null
     } : null;
     

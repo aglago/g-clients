@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     // Parse paymentDetails JSON string to object for frontend
     const transformedInvoices = invoices.map(invoice => ({
       ...invoice.toObject(),
-      id: String((invoice as any)._id),
+      id: String(invoice._id),
       paymentDetails: invoice.paymentDetails ? JSON.parse(invoice.paymentDetails) : null
     }));
     
