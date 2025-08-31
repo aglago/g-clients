@@ -1,33 +1,36 @@
-# ProjectOne - Learning Management System
+# G-Clients - Learning Management System
 
-A comprehensive full-stack learning management system built with modern web technologies, designed to facilitate professional learning and development through courses, tracks, and structured learning paths.
+A comprehensive full-stack Learning Management System (LMS) built with modern web technologies. This platform enables administrators to manage learning tracks and courses while providing learners with an intuitive portal for course enrollment, progress tracking, and profile management.
 
 ## 🚀 Project Overview
 
-ProjectOne is a sophisticated learning management system that enables administrators to manage courses, tracks, and learner progress while providing learners with a seamless learning experience. The platform features a robust authentication system, course management, progress tracking, and comprehensive administrative tools.
+G-Clients is a production-ready LMS featuring dual authentication systems, comprehensive course management, automated payment processing, and real-time analytics. The platform supports track-based learning with integrated billing and progress tracking capabilities.
 
-### Key Features
+### ✨ Key Features
 
-- **👥 User Management**: Separate admin and learner authentication systems
-- **📚 Course Management**: Create, update, and manage learning courses
-- **🎯 Learning Tracks**: Organize courses into structured learning paths
-- **📈 Progress Tracking**: Monitor learner progress and completion rates
-- **💳 Invoice Management**: Handle payments and billing
-- **📧 Email Notifications**: Automated email system for verification and notifications
-- **🔐 Secure Authentication**: JWT-based authentication with OTP verification
-- **🎨 Modern UI**: Clean, responsive interface built with Tailwind CSS
-- **📱 Mobile-Responsive**: Optimized for all device sizes
+- **👥 Dual User Management**: Separate admin dashboard and learner portal with role-based authentication
+- **📚 Track & Course Management**: Hierarchical learning structure with tracks containing multiple courses
+- **🎯 Smart Enrollment System**: Automated checkout flow with account creation and payment processing
+- **📈 Progress Tracking**: Real-time learning progress with completion tracking and rating system
+- **💳 Integrated Billing**: Complete invoice management with payment status tracking
+- **📧 Email Automation**: Automated notifications for registration, enrollment, and payment events
+- **🔐 Secure Authentication**: JWT-based auth with OTP email verification and password reset
+- **📊 Analytics Dashboard**: Revenue charts, enrollment metrics, and comprehensive reporting
+- **🎨 Modern UI**: Responsive design with Tailwind CSS and Shadcn/ui components
+- **☁️ Cloud Integration**: Cloudinary integration for image uploads and management
 
 ## 🛠️ Technology Stack
 
 ### Frontend
 - **Framework**: Next.js 15.3.5 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Components**: Shadcn/ui
-- **State Management**: Zustand
-- **Data Fetching**: TanStack Query (React Query)
+- **Language**: TypeScript 5.0.0
+- **Styling**: Tailwind CSS 4.1
+- **UI Components**: Shadcn/ui with Radix UI primitives
+- **State Management**: Zustand with persistence
+- **Data Fetching**: TanStack Query (React Query) v5
 - **HTTP Client**: Axios
+- **Charts**: Recharts for analytics
+- **Icons**: Lucide React
 - **Notifications**: Sonner (Toast notifications)
 
 ### Backend
@@ -35,111 +38,85 @@ ProjectOne is a sophisticated learning management system that enables administra
 - **Framework**: Next.js API Routes
 - **Database**: MongoDB with Mongoose ODM
 - **Authentication**: JWT (JSON Web Tokens)
-- **Password Hashing**: bcryptjs
-- **Email Service**: Nodemailer (Gmail SMTP)
-- **Environment**: Environment variables for configuration
+- **Password Security**: bcryptjs with 12 salt rounds
+- **Email Service**: Nodemailer with Gmail SMTP
+- **File Storage**: Cloudinary
+- **OTP System**: Time-limited 6-digit verification codes
 
 ### Development Tools
 - **Package Manager**: npm
 - **Type Checking**: TypeScript
 - **Linting**: ESLint
-- **Code Style**: Prettier (via ESLint)
+- **Code Formatting**: Prettier
 - **Version Control**: Git
 
-## 📋 Libraries and Dependencies
+## 📱 Application Structure
 
-### Core Dependencies
-```json
-{
-  "next": "15.3.5",
-  "react": "19.0.0",
-  "typescript": "5.0.0",
-  "tailwindcss": "3.4.1",
-  "mongoose": "^8.0.0",
-  "bcryptjs": "^2.4.3",
-  "nodemailer": "^6.9.0",
-  "axios": "^1.6.0",
-  "zustand": "^4.4.0",
-  "@tanstack/react-query": "^5.0.0",
-  "sonner": "^1.3.0"
-}
-```
+### Public Pages
+- **Landing Page** (`/`) - Hero section, track showcase, statistics, and call-to-actions
+- **Track Catalog** (`/tracks`) - Browse tracks with search and filtering capabilities
+- **Track Details** (`/tracks/[slug]`) - Individual track information with enrollment options
+- **Checkout Flow** (`/checkout`) - Comprehensive enrollment process with payment integration
 
-### UI and Styling
-- **@radix-ui/react-***: Accessible UI primitives
-- **class-variance-authority**: For component variants
-- **clsx**: For conditional class names
-- **tailwind-merge**: For merging Tailwind classes
-- **lucide-react**: Modern icon library
+### Admin Dashboard (`/admin/dashboard/`)
+- **Overview** - Metrics cards, revenue charts, and recent activity
+- **Track Management** - CRUD operations with modal-based forms
+- **Course Management** - Individual course creation and editing
+- **Learner Management** - User profile management and enrollment tracking
+- **Invoice Management** - Payment records and billing overview
+- **Reports** - Advanced analytics and data visualization
+- **Profile Settings** - Admin account management
 
-## 🏗️ Architecture Decisions
+### Learner Portal (`/portal`)
+- **Dashboard** - Enrolled tracks, course progress, and learning statistics
+- **Settings** - Profile editing with image upload and personal information
+- **Invoice History** - Payment records and enrollment receipts
 
-### Why Next.js 15?
-- **Full-Stack Capability**: Combines frontend and backend in one framework
-- **App Router**: Modern routing with server components
-- **API Routes**: Built-in API endpoint creation
-- **Performance**: Automatic optimization and caching
-- **Type Safety**: Excellent TypeScript integration
+### Authentication System
+- **Dual Registration** - Separate flows for admin and learner accounts
+- **Unified Login** - Single login page with role-based redirection
+- **Email Verification** - OTP-based account activation
+- **Password Reset** - Secure token-based password recovery
 
-### Why MongoDB?
-- **Flexibility**: Schema-less design for evolving data structures
-- **Scalability**: Horizontal scaling capabilities
-- **Performance**: Fast queries and indexing
-- **JSON-Native**: Perfect match for JavaScript/TypeScript applications
-- **Mongoose ODM**: Provides schema validation and middleware
+## 🗃️ Database Schema
 
-### Why Zustand over Redux?
-- **Simplicity**: Less boilerplate and easier setup
-- **Performance**: Minimal re-renders and efficient updates
-- **TypeScript**: Excellent TypeScript support
-- **Bundle Size**: Smaller footprint than Redux
-- **Developer Experience**: Intuitive API and debugging
+### Core Models
+- **User**: Unified user model supporting admin/learner roles with profile data
+- **Track**: Learning tracks with pricing, duration, and course associations
+- **Course**: Individual courses belonging to tracks
+- **Invoice**: Payment records linking learners to track enrollments
+- **TrackEnrollment**: Progress tracking for learner-track relationships
+- **CourseRegistration**: Individual course completion tracking
 
-### Why TanStack Query?
-- **Server State**: Specialized for server state management
-- **Caching**: Intelligent caching and background updates
-- **Performance**: Optimistic updates and pagination
-- **Developer Tools**: Excellent debugging capabilities
-- **Integration**: Works seamlessly with our API structure
-
-### Why Shadcn/ui?
-- **Accessibility**: Built on Radix UI primitives
-- **Customization**: Copy-paste components for full control
-- **Consistency**: Unified design system
-- **Modern**: Latest React patterns and best practices
-- **TypeScript**: Full TypeScript support
-
-### Why JWT Authentication?
-- **Stateless**: No server-side session storage needed
-- **Scalable**: Works across distributed systems
-- **Secure**: Cryptographically signed tokens
-- **Flexible**: Can carry user information and permissions
-- **Standard**: Industry-standard authentication method
-
-### Why OTP Email Verification?
-- **Security**: More secure than long-lived tokens
-- **User Experience**: Familiar verification method
-- **Time-Limited**: Automatic expiration reduces risk
-- **Numeric**: Easy to type and remember
-- **Mobile-Friendly**: Works well on all devices
+### Key Relationships
+- Users have many TrackEnrollments and Invoices
+- Tracks contain many Courses and generate Invoices
+- Enrollments track progress and link Users to Tracks
 
 ## 🔧 Environment Configuration
 
 ### Required Environment Variables
 
+Copy `.env.example` to `.env` and configure:
+
 ```bash
-# Database
-MONGODB_URI=mongodb://localhost:27017/projectone
+# Database Configuration
+MONGODB_URI=mongodb://localhost:27017/your-database-name
 
-# Authentication
-JWT_SECRET=your-jwt-secret-key
+# JWT Authentication
+JWT_SECRET=your-long-random-jwt-secret-key-here
 
-# Email Service
+# Email Configuration (SMTP)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password
-EMAIL_FROM=your-email@gmail.com
+EMAIL_FROM=Your-App-Name
+
+# Cloudinary Image Upload
+CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
+CLOUDINARY_API_KEY=your-cloudinary-api-key
+CLOUDINARY_API_SECRET=your-cloudinary-api-secret
 
 # App Configuration
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -149,25 +126,43 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ```
 src/
-├── app/                    # Next.js App Router pages
-│   ├── api/               # API routes
-│   │   ├── auth/          # Authentication endpoints
-│   │   ├── courses/       # Course management
-│   │   ├── learners/      # Learner management
-│   │   └── tracks/        # Track management
-│   ├── auth/              # Authentication pages
-│   └── globals.css        # Global styles
-├── components/            # Reusable UI components
-│   └── ui/               # Shadcn/ui components
-├── lib/                   # Utility libraries
-│   ├── models/           # MongoDB models
-│   ├── services/         # Business logic services
-│   ├── auth.ts           # Authentication utilities
-│   ├── email.ts          # Email service
-│   └── api.ts            # API client
-├── stores/               # Zustand stores
-├── hooks/                # Custom React hooks
-└── middleware.ts         # Next.js middleware
+├── app/                          # Next.js App Router
+│   ├── admin/                   # Admin dashboard pages
+│   │   └── dashboard/           # Admin features (tracks, courses, learners, etc.)
+│   ├── api/                     # API routes
+│   │   ├── auth/               # Authentication endpoints
+│   │   ├── checkout/           # Enrollment and payment processing
+│   │   ├── tracks/             # Track management
+│   │   ├── courses/            # Course management
+│   │   ├── learners/           # Learner management
+│   │   ├── invoices/           # Invoice management
+│   │   └── public/             # Public API endpoints
+│   ├── (auth)/                 # Authentication pages
+│   ├── portal/                 # Learner portal
+│   ├── tracks/                 # Track catalog and details
+│   ├── checkout/               # Enrollment checkout flow
+│   └── globals.css             # Global styles and Tailwind imports
+├── components/                  # Reusable UI components
+│   ├── admin/                  # Admin-specific components
+│   ├── auth/                   # Authentication components and guards
+│   ├── charts/                 # Analytics and data visualization
+│   ├── dashboard/              # Dashboard-specific components
+│   ├── forms/                  # Form components
+│   ├── icons/                  # Custom icon components
+│   ├── learner/               # Learner-facing components
+│   ├── modals/                # Modal dialogs
+│   └── ui/                    # Shadcn/ui base components
+├── lib/                        # Utilities and configurations
+│   ├── models/                # Mongoose database models
+│   ├── services/              # Business logic and database services
+│   ├── api.ts                 # API client and endpoints
+│   ├── auth.ts                # Authentication utilities
+│   ├── dashboard-analytics.ts # Analytics calculations
+│   ├── email.ts               # Email service configuration
+│   └── utils.ts               # Common utility functions
+├── stores/                     # Zustand state stores
+│   └── authStore.ts           # Authentication state management
+└── middleware.ts              # Next.js middleware for route protection
 ```
 
 ## 🚀 Getting Started
@@ -175,7 +170,7 @@ src/
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd projectone
+   cd g-clients
    ```
 
 2. **Install dependencies**
@@ -191,7 +186,10 @@ src/
 
 4. **Start MongoDB**
    ```bash
+   # Using local MongoDB
    mongod
+   
+   # Or using MongoDB Atlas (update MONGODB_URI in .env)
    ```
 
 5. **Run the development server**
@@ -204,72 +202,161 @@ src/
    http://localhost:3000
    ```
 
+7. **Access Admin Dashboard**
+   ```
+   http://localhost:3000/admin/dashboard
+   # Create admin account at /admin/register
+   ```
+
 ## 📚 API Documentation
 
 ### Authentication Endpoints
-- `POST /api/auth/register-admin` - Register new admin
+- `POST /api/auth/register-admin` - Register new administrator
 - `POST /api/auth/register-learner` - Register new learner
-- `POST /api/auth/login` - User login
-- `POST /api/auth/verify-email` - Verify email with OTP
-- `POST /api/auth/resend-verification` - Resend OTP
+- `POST /api/auth/login` - Unified login for both roles
+- `POST /api/auth/verify-email` - Verify email with OTP code
+- `POST /api/auth/resend-verification` - Resend OTP code
 - `POST /api/auth/forgot-password` - Request password reset
-- `POST /api/auth/reset-password` - Reset password with token
+- `POST /api/auth/reset-password` - Complete password reset
+- `PUT /api/auth/update-user` - Update user profile
+- `GET /api/auth/check` - Verify authentication status
 
-### Course Management
-- `GET /api/courses` - Get all courses
-- `POST /api/courses` - Create new course
-- `GET /api/courses/[id]` - Get course by ID
-- `PUT /api/courses/[id]` - Update course
-- `DELETE /api/courses/[id]` - Delete course
+### Content Management
+- `GET/POST /api/tracks` - Track management
+- `GET/PUT/DELETE /api/tracks/[id]` - Individual track operations
+- `GET/POST /api/courses` - Course management
+- `GET/PUT/DELETE /api/courses/[id]` - Individual course operations
+- `GET/POST /api/learners` - Learner management
+- `GET/PUT/DELETE /api/learners/[id]` - Individual learner operations
 
-### User Management
-- `GET /api/learners` - Get all learners
-- `POST /api/learners` - Create new learner
-- `GET /api/learners/[id]` - Get learner by ID
-- `PUT /api/learners/[id]` - Update learner
-- `DELETE /api/learners/[id]` - Delete learner
+### Enrollment & Payment
+- `POST /api/checkout/process` - Process new user enrollment
+- `POST /api/checkout/authenticated` - Process existing user enrollment
+- `GET/POST /api/invoices` - Invoice management
+- `GET /api/invoices/user` - User's invoice history
+- `GET/POST /api/track-enrollments` - Enrollment tracking
+- `GET/POST /api/course-registrations` - Course registration tracking
+
+### Public & Utility
+- `GET /api/public/stats` - Public statistics for landing page
+- `POST /api/upload` - File upload to Cloudinary
+- `GET /api/enrollments/[userId]` - User enrollment data
 
 ## 🔒 Security Features
 
-- **Password Hashing**: bcryptjs with 12 salt rounds
-- **JWT Tokens**: Secure token-based authentication
-- **OTP Verification**: Time-limited 6-digit codes
+### Authentication & Authorization
+- **JWT Tokens**: Secure, stateless authentication
+- **Role-Based Access**: Separate admin and learner permissions
+- **Route Protection**: Middleware-based route guarding
+- **OTP Verification**: Email-based account activation
+- **Password Security**: bcryptjs hashing with salt rounds
+
+### Data Protection
 - **Input Validation**: Comprehensive request validation
-- **Error Handling**: Secure error responses
+- **Error Handling**: Secure error responses without data leakage
 - **Environment Variables**: Sensitive data protection
+- **CORS Configuration**: Controlled cross-origin requests
 
-## 📈 Performance Optimizations
+### Payment Security
+- **User Verification**: Prevents unauthorized charges to existing accounts
+- **Invoice Tracking**: Complete audit trail for all transactions
+- **Secure Checkout**: Multi-step verification process
 
-- **React Query**: Intelligent caching and background updates
-- **Next.js Optimizations**: Automatic code splitting and optimization
-- **MongoDB Indexing**: Efficient database queries
-- **Zustand**: Minimal re-renders and efficient state updates
-- **Image Optimization**: Next.js automatic image optimization
+## 📈 Analytics & Reporting
 
-## 🧪 Testing
+### Admin Dashboard Metrics
+- **Real-time Statistics**: Total learners, revenue, and invoices
+- **Trend Analysis**: Month-over-month growth indicators
+- **Revenue Charts**: Interactive time-series data visualization
+- **Enrollment Tracking**: Student progress and completion rates
 
+### Advanced Analytics
+- **Time Period Selection**: 1, 3, 6, or 12-month views
+- **Data Filtering**: Filter by status, date ranges, and categories
+- **Export Capabilities**: Data export for external analysis
+
+## 🎨 UI/UX Features
+
+### Design System
+- **Consistent Theming**: Unified color palette and typography
+- **Responsive Design**: Mobile-first approach with breakpoint optimization
+- **Accessibility**: WCAG-compliant components with keyboard navigation
+- **Loading States**: Skeleton screens and progress indicators
+
+### User Experience
+- **Smart Navigation**: Context-aware menu options
+- **Toast Notifications**: Non-intrusive user feedback
+- **Modal Interactions**: Overlay-based forms and confirmations
+- **Search & Filtering**: Advanced content discovery tools
+
+## 🧪 Development & Testing
+
+### Available Scripts
 ```bash
-# Run linting
-npm run lint
+# Development
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
 
-# Build for production
-npm run build
-
-# Start production server
-npm start
+# Code Quality
+npm run lint         # Run ESLint
+npm run lint:fix     # Fix ESLint issues
+npm run type-check   # TypeScript type checking
 ```
 
-## 📝 Development Blog Posts
+### Code Quality
+- **TypeScript**: Full type safety throughout the application
+- **ESLint**: Consistent code style and error detection
+- **Prettier**: Automated code formatting
+- **Modular Architecture**: Separation of concerns and reusable components
 
-- [REGISTER-ADMIN.md](./REGISTER-ADMIN.md) - Complete guide to admin registration implementation
+## 🚀 Deployment
+
+### Production Build
+1. Set production environment variables
+2. Build the application: `npm run build`
+3. Start the production server: `npm start`
+
+### Environment Considerations
+- MongoDB connection string for production database
+- SMTP configuration for email services
+- Cloudinary credentials for file uploads
+- Secure JWT secret generation
+
+## 📝 Key Business Features
+
+### Learning Management
+- **Track-Based Learning**: Structured learning paths with multiple courses
+- **Progress Tracking**: Real-time completion percentages and milestones
+- **Flexible Enrollment**: Support for both free and paid tracks
+- **Instructor Management**: Track assignment to specific instructors
+
+### Payment Processing
+- **Automated Invoicing**: Instant invoice generation upon enrollment
+- **Payment Status Tracking**: Complete audit trail for all transactions
+- **Failed Payment Handling**: Graceful handling with retry mechanisms
+- **Email Notifications**: Automated communication for all payment events
+
+### Administrative Tools
+- **Comprehensive Dashboard**: Single-pane-of-glass for all operations
+- **User Management**: Complete CRUD operations for all user types
+- **Content Management**: Easy track and course creation and editing
+- **Reporting Suite**: Advanced analytics and data visualization
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+### Development Guidelines
+- Follow TypeScript best practices
+- Maintain component modularity
+- Write descriptive commit messages
+- Test new features thoroughly
+- Update documentation as needed
 
 ## 📄 License
 
@@ -277,10 +364,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- Next.js team for the amazing framework
-- Shadcn for the beautiful UI components
-- MongoDB team for the robust database
-- All open-source contributors who made this project possible
+- **Next.js Team** - For the exceptional full-stack framework
+- **Shadcn/ui** - For the beautiful, accessible component library
+- **MongoDB** - For the flexible, scalable database solution
+- **Tailwind CSS** - For the utility-first styling approach
+- **Open Source Community** - For the tools and libraries that made this possible
 
 ---
 
