@@ -5,11 +5,13 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   tracksApi, 
   coursesApi,
   learnersApi,
   invoicesApi,
+  trackEnrollmentsApi,
   queryKeys
 } from '@/lib/api';
 import { RevenueChart, TimePeriodSelector, type ChartVariant } from '@/components/charts';
@@ -22,6 +24,7 @@ import {
   DollarSign, 
   FileText, 
   BookOpen,
+  ChevronDown,
 } from 'lucide-react';
 
 export default function ReportsPage() {
@@ -36,7 +39,10 @@ export default function ReportsPage() {
   });
 
   // State for top tracks sorting
-  const [tracksSortBy, setTracksSortBy] = useState<'revenue' | 'enrollments' | 'completion'>('revenue');
+  const [tracksSortBy, setTracksSortBy] = useState<'revenue' | 'enrollments' | 'completion' | 'rating'>('revenue');
+  
+  // State for collapsible section
+  const [isTopTracksExpanded, setIsTopTracksExpanded] = useState(true);
 
   const { data: learners = [], isLoading: learnersLoading } = useQuery({
     queryKey: [queryKeys.learners.all],
@@ -58,6 +64,11 @@ export default function ReportsPage() {
     queryFn: coursesApi.getAllCourses,
   });
 
+  const { data: enrollments = [] } = useQuery({
+    queryKey: [queryKeys.trackEnrollments.all],
+    queryFn: trackEnrollmentsApi.getAllTrackEnrollments,
+  });
+
   // Calculate metrics
   const metrics = calculateDashboardMetrics(learners, invoices);
 
@@ -70,24 +81,26 @@ export default function ReportsPage() {
 
   // Top performing tracks - calculated from real data
   const topTracks = tracks.map((track) => {
-    // Calculate enrollments for this track
-    const trackLearners = learners.filter(learner => learner.trackId === track.id);
-    const enrollments = trackLearners.length;
+    // Calculate enrollments for this track from actual enrollment data
+    const trackEnrollments = enrollments.filter(enrollment => 
+      enrollment.trackId && 
+      enrollment.trackId._id === track.id
+    );
+    const enrollmentCount = trackEnrollments.length;
     
-    // Calculate revenue from invoices for learners in this track
+    // Calculate revenue from invoices that have this trackId
     const trackRevenue = invoices.filter(invoice => 
-      invoice.learnerId && trackLearners.some(learner => 
-        learner.email === invoice.learnerId.email
-      )
+      invoice.trackId && 
+      invoice.trackId._id === track.id
     ).reduce((sum, invoice) => sum + (invoice.status === 'paid' ? invoice.amount : 0), 0);
     
     // Mock completion rate for now (would need progress tracking data)
     // In a real system, this would come from enrollment/progress data
-    const completion = enrollments > 0 ? Math.min(Math.max(60 + (enrollments * 2), 65), 95) : 0;
+    const completion = enrollmentCount > 0 ? Math.min(Math.max(60 + (enrollmentCount * 2), 65), 95) : 0;
     
     return {
       ...track,
-      enrollments,
+      enrollments: enrollmentCount,
       revenue: trackRevenue,
       completion,
     };
@@ -100,6 +113,8 @@ export default function ReportsPage() {
         return b.enrollments - a.enrollments;
       case 'completion':
         return b.completion - a.completion;
+      case 'rating':
+        return (b.rating || 0) - (a.rating || 0);
       default:
         return b.revenue - a.revenue;
     }
@@ -253,22 +268,36 @@ export default function ReportsPage() {
 
       {/* Top Performing Tracks */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="font-semibold text-[20px] leading-[28px] font-figtree py-3.5 border-b-1">
-            Top Performing Tracks
-          </CardTitle>
-          <Select value={tracksSortBy} onValueChange={(value: 'revenue' | 'enrollments' | 'completion') => setTracksSortBy(value)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="revenue">Revenue</SelectItem>
-              <SelectItem value="enrollments">Enrollments</SelectItem>
-              <SelectItem value="completion">Completion Rate</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardHeader>
-        <CardContent>
+        <Collapsible open={isTopTracksExpanded} onOpenChange={setIsTopTracksExpanded}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="flex flex-row items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <CardTitle className="font-semibold text-[20px] leading-[28px] font-figtree py-3.5 border-b-1">
+                  Top Performing Tracks
+                </CardTitle>
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isTopTracksExpanded ? 'rotate-180' : ''}`} />
+              </div>
+              <div onClick={(e) => e.stopPropagation()}>
+                <Select 
+                  value={tracksSortBy} 
+                  onValueChange={(value: 'revenue' | 'enrollments' | 'completion' | 'rating') => setTracksSortBy(value)}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="revenue">Revenue</SelectItem>
+                    <SelectItem value="enrollments">Enrollments</SelectItem>
+                    <SelectItem value="completion">Completion Rate</SelectItem>
+                    <SelectItem value="rating">Rating</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent>
+            <CardContent>
           <div className="space-y-4">
             {topTracks.map((track, idx) => (
               <div
@@ -290,28 +319,57 @@ export default function ReportsPage() {
                 </div>
                 
                 <div className="flex items-center gap-6 text-sm">
-                  <div className="text-center">
-                    <p className="font-semibold">{track.enrollments}</p>
-                    <p className="text-muted-foreground">Enrollments</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="font-semibold">${track.revenue.toLocaleString()}</p>
-                    <p className="text-muted-foreground">Revenue</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="font-semibold">{track.completion}%</p>
-                    <p className="text-muted-foreground">Completion</p>
-                  </div>
+                  {tracksSortBy === 'enrollments' && (
+                    <div className="text-center">
+                      <p className="font-semibold">{track.enrollments}</p>
+                      <p className="text-muted-foreground">Enrollments</p>
+                    </div>
+                  )}
+                  {tracksSortBy === 'revenue' && (
+                    <div className="text-center">
+                      <p className="font-semibold">${track.revenue.toLocaleString()}</p>
+                      <p className="text-muted-foreground">Revenue</p>
+                    </div>
+                  )}
+                  {tracksSortBy === 'completion' && (
+                    <div className="text-center">
+                      <p className="font-semibold">{track.completion}%</p>
+                      <p className="text-muted-foreground">Completion Rate</p>
+                    </div>
+                  )}
+                  {tracksSortBy === 'rating' && (
+                    <div className="text-center">
+                      <p className="font-semibold">{(track.rating || 0).toFixed(1)} ⭐</p>
+                      <p className="text-muted-foreground">Rating</p>
+                    </div>
+                  )}
                   <Badge 
-                    variant={track.completion > 80 ? 'success' : track.completion > 60 ? 'secondary' : 'destructive'}
+                    variant={
+                      tracksSortBy === 'completion' 
+                        ? (track.completion > 80 ? 'success' : track.completion > 60 ? 'secondary' : 'destructive')
+                        : tracksSortBy === 'enrollments'
+                        ? (track.enrollments > 10 ? 'success' : track.enrollments > 5 ? 'secondary' : 'destructive')
+                        : tracksSortBy === 'rating'
+                        ? ((track.rating || 0) > 4.0 ? 'success' : (track.rating || 0) > 3.0 ? 'secondary' : 'destructive')
+                        : (track.revenue > 1000 ? 'success' : track.revenue > 500 ? 'secondary' : 'destructive')
+                    }
                   >
-                    {track.completion > 80 ? 'Excellent' : track.completion > 60 ? 'Good' : 'Needs Attention'}
+                    {tracksSortBy === 'completion' 
+                      ? (track.completion > 80 ? 'Excellent' : track.completion > 60 ? 'Good' : 'Needs Attention')
+                      : tracksSortBy === 'enrollments'
+                      ? (track.enrollments > 10 ? 'Popular' : track.enrollments > 5 ? 'Good' : 'Growing')
+                      : tracksSortBy === 'rating'
+                      ? ((track.rating || 0) > 4.0 ? 'Highly Rated' : (track.rating || 0) > 3.0 ? 'Well Rated' : 'Needs Improvement')
+                      : (track.revenue > 1000 ? 'High Revenue' : track.revenue > 500 ? 'Good Revenue' : 'Low Revenue')
+                    }
                   </Badge>
                 </div>
               </div>
             ))}
           </div>
-        </CardContent>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
       </Card>
 
       {/* Recent Activity Summary */}
