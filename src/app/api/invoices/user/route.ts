@@ -17,9 +17,16 @@ export async function GET(request: NextRequest) {
     // Get all invoices for the authenticated user
     const invoices = await invoiceService.getInvoicesByLearnerId(userId);
     
+    // Transform the data to include trackName for frontend consumption
+    const transformedInvoices = invoices.map(invoice => ({
+      ...invoice.toObject(),
+      trackName: invoice.trackId?.name || null,
+      courseName: invoice.courseId?.title || null
+    }));
+    
     return NextResponse.json({
       success: true,
-      data: invoices
+      data: transformedInvoices
     });
   } catch (error) {
     console.error('Get user invoices error:', error);
