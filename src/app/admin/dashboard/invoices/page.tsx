@@ -119,6 +119,7 @@ export default function InvoicesPage() {
       invoice.learnerId.firstName || "",
       invoice.learnerId.lastName || "",
       invoice.learnerId.email || "",
+      invoice.trackId?.name || "",
     ].filter(Boolean);
   };
 
@@ -233,6 +234,14 @@ export default function InvoicesPage() {
         cell: ({ row }) => getLearnerEmail(row.original.learnerId),
       },
       {
+        accessorKey: "track",
+        header: "TRACK",
+        cell: ({ row }) => {
+          const invoice = row.original;
+          return invoice.trackId?.name || "Not enrolled";
+        },
+      },
+      {
         accessorKey: "createdAt",
         header: "DATE JOINED",
         cell: ({ row }) => {
@@ -341,7 +350,7 @@ export default function InvoicesPage() {
         items={invoices}
         getSearchableText={getInvoiceSearchableText}
         onSearchResults={handleSearchResults}
-        searchPlaceholder="Search invoices by learner, amount, status..."
+        searchPlaceholder="Search invoices by learner, track, amount, status..."
         addButtonText="Add New Invoice"
         onAddClick={handleAddInvoice}
         isLoading={isLoading}
@@ -505,6 +514,7 @@ export default function InvoicesPage() {
                   ? {
                       ...editingInvoice,
                       learnerId: editingInvoice.learnerId.email, // Convert back to string for form
+                      trackId: editingInvoice.trackId?._id, // Convert populated track back to ID string
                     }
                   : undefined
               }

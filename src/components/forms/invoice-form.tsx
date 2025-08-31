@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { CreateInvoiceRequest, UpdateInvoiceRequest, Invoice, queryKeys, Learner, learnersApi } from '@/lib/api'
+import { CreateInvoiceRequest, UpdateInvoiceRequest, Invoice, queryKeys, Learner, learnersApi, tracksApi, Track } from '@/lib/api'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { ChevronDown } from 'lucide-react'
@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react'
 
 const invoiceFormSchema = z.object({
   learnerId: z.string().min(1, 'Learner is required'),
+  trackId: z.string().optional(),
   amount: z.number().min(0.01, 'Amount must be greater than 0'),
   dueDate: z.string().min(1, 'Due date is required'),
   status: z.enum(['paid', 'unpaid', 'cancelled'], {
@@ -41,6 +42,11 @@ export default function InvoiceForm({ invoice, onSubmit, isLoading = false }: In
   const { data: learners = [], isLoading: learnersLoading } = useQuery({
     queryKey: [queryKeys.learners.all],
     queryFn: learnersApi.getAllLearners,
+  })
+
+  const { data: tracks = [], isLoading: tracksLoading } = useQuery({
+    queryKey: [queryKeys.tracks.all],
+    queryFn: tracksApi.getAllTracks,
   })
 
   // Parse existing payment details if editing
@@ -70,6 +76,7 @@ export default function InvoiceForm({ invoice, onSubmit, isLoading = false }: In
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
       learnerId: '',
+      trackId: invoice?.trackId || '',
       amount: invoice?.amount || 0,
       dueDate: invoice?.dueDate ? invoice.dueDate.split('T')[0] : '', // Format for date input
       status: invoice?.status || 'unpaid',
@@ -101,6 +108,7 @@ export default function InvoiceForm({ invoice, onSubmit, isLoading = false }: In
 
     const formData = {
       learnerId: data.learnerId,
+      trackId: data.trackId,
       amount: data.amount,
       dueDate: new Date(data.dueDate).toISOString(),
       status: data.status,
@@ -145,6 +153,34 @@ export default function InvoiceForm({ invoice, onSubmit, isLoading = false }: In
             {errors.learnerId && (
               <p className="text-sm text-destructive">{errors.learnerId.message}</p>
             )}
+          </div>
+          
+          {/* Track Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="trackId">Select Track (Optional)</Label>
+            <Select
+              value={watch('trackId') || 'none'}
+              onValueChange={(value) => setValue('trackId', value === 'none' ? undefined : value)}
+              disabled={tracksLoading}
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder={tracksLoading ? "Loading tracks..." : "Select a track (optional)"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No track selected</SelectItem>
+                {tracks.length === 0 ? (
+                  <SelectItem value="no-tracks" disabled>
+                    No tracks available
+                  </SelectItem>
+                ) : (
+                  tracks.map((track: Track) => (
+                    <SelectItem key={track.id} value={track.id}>
+                      {track.name} - ${track.price}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Amount */}
