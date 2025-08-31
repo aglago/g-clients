@@ -75,7 +75,7 @@ export default function Trackcard({
 
             {!minimal && (
               <div className="h-[45px] flex items-start">
-                <p className="text-[16px] leading-[24px] font-inter text-muted-foreground line-clamp-3">
+                <p className="text-[16px] leading-[24px] font-inter text-muted-foreground line-clamp-2">
                   {truncatedDescription}
                 </p>
               </div>

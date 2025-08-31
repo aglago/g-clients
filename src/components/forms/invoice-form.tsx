@@ -154,7 +154,7 @@ export default function InvoiceForm({ invoice, onSubmit, isLoading = false }: In
               <p className="text-sm text-destructive">{errors.learnerId.message}</p>
             )}
           </div>
-          
+
           {/* Track Selection */}
           <div className="space-y-2">
             <Label htmlFor="trackId">Select Track (Optional)</Label>
